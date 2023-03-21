@@ -1,0 +1,27 @@
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+  }
+  
+  .footerButton {
+    background-color: white;
+    color: #333;
+    border: none;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .footerButton:hover {
+    background-color: #f1f1f1;
+    color: #333;
+  }
+  

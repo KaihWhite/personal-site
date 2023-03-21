@@ -1,0 +1,22 @@
+.navbar {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  
+  .navList {
+    display: flex;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navItem {
+    margin-left: 1rem;
+  }
+  
+  .navLink {
+    color: white;
+    text-decoration: none;
+  }
+  
