@@ -1,6 +1,8 @@
+// pages/index.js
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 export default function Home() {
   return (
@@ -15,6 +17,8 @@ export default function Home() {
         <h1>Placeholder Text</h1>
         <Navbar />
       </header>
+
+      <Footer />
     </div>
   );
 }

@@ -1,9 +1,9 @@
-import styles from './Footer.module.css';
+import styles from '../Footer.module.css';
 
 const Footer = () => {
   return (
     <footer className={styles.footer}>
-      <a href="https://www.example.com" target="_blank" rel="noopener noreferrer">
+      <a href="https://www.kaihwhite.com" target="_blank" rel="noopener noreferrer">
         <button className={styles.footerButton}>Visit Example Site</button>
       </a>
       <a href="https://www.another-example.com" target="_blank" rel="noopener noreferrer">
