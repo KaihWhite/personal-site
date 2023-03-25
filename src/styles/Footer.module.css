@@ -5,6 +5,8 @@
     background-color: #333;
     color: white;
     padding: 1rem;
+    position: fixed;
+    bottom: 0;
   }
   
   .footerButton {
@@ -21,7 +23,7 @@
   }
   
   .footerButton:hover {
-    background-color: #f1f1f1;
+    background-color: #c3c2c2;
     color: #333;
   }
   

@@ -8,9 +8,13 @@
 }
 
 .banner {
-  background-color: #333;
+  background-color: #282828;
   color: white;
-  padding: 2rem;
-  text-align: center;
+  padding: 1rem;
+  text-align: left;
   width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 }
