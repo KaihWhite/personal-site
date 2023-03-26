@@ -11,11 +11,18 @@ terraform {
 
 provider "aws" {
   region  = "us-west-2"
+  access_key  = "AKIA2Z7SETYLLCOVQBCS"
+  secret_key  = "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"
+}
+
+variable "github_token" {
+  description = "GitHub personal access token"
 }
 
 resource "aws_amplify_app" "personal-site" {
   name       = "personal site"
   repository = "https://github.com/KaihWhite/personal-site"
+  access_token = var.github_token
 
   # The default build_spec added by the Amplify Console for React.
   build_spec = <<-EOT
