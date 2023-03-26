@@ -39,10 +39,10 @@ resource "aws_amplify_app" "personal-site" {
     phases:
       preBuild:
         commands:
-          - yarn install
+          - npm install
       build:
         commands:
-          - yarn build
+          - npm run build
     artifacts:
       baseDirectory: .next
       files:
@@ -53,13 +53,18 @@ resource "aws_amplify_app" "personal-site" {
         - .next/cache/**/*
 EOT
 
-  # The default rewrites and redirects added by the Amplify Console.
   custom_rule {
   source      = "</^[^.]+$|\\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|ttf|map|json)$)([^.]+$)/>"
   target      = "/index.html"
   status      = "200"
   condition   = "404"
-}
+  }
+
+  custom_rule {
+  source      = "/_next/static/<*>"
+  target      = "/_next/static/<*>"
+  status      = "200"
+  }
 
   environment_variables = {
     ENV = "dev"
