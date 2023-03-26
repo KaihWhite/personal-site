@@ -20,11 +20,11 @@ const ShadedPyramid = () => {
     const pyramid = new THREE.Mesh(pyramidGeometry, material);
     scene.add(pyramid);
 
-    const light = new THREE.PointLight(0xffffff, 0.75, 100);
-    light.position.set(10, -5, 10);
+    const light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(10, 2, 5);
     scene.add(light);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
     scene.add(ambientLight);
 
     camera.position.z = 3;

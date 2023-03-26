@@ -3,10 +3,12 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import RotatingLight from '../components/RotatingLight'
 
 export default function About() {
   return (
     <div className={styles.container}>
+        <RotatingLight/>
       <Head>
         <title>About Page</title>
         <meta name="description" content="About Page" />
