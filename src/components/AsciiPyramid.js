@@ -14,23 +14,34 @@ const vertexShader = `
 
 const fragmentShader = `
   uniform vec3 lightPosition;
-  uniform sampler2D asciiTexture;
   varying vec3 vWorldPosition;
 
   float intensity(vec3 pos) {
+    vec3 lightDirection = normalize(lightPosition - pos);
+    vec3 normal = normalize(cross(dFdx(pos), dFdy(pos)));
+    float cosTheta = max(dot(normal, lightDirection), 0.0);
     float dist = distance(lightPosition, pos);
-    return 1.0 / (dist * dist);
+    return cosTheta / (dist * dist);
   }
 
   void main() {
     float i = intensity(vWorldPosition);
-    vec2 uv = vec2(1.0 - i, 0.5);
-    vec4 texColor = texture2D(asciiTexture, uv);
-    float brightness = texColor.r;
+    float step = 1.0 / 9.0;
+
+    // ASCII characters as brightness values
+    float ascii[9] = float[9](0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9);
+    float brightness = 0.0;
+    
+    for (int j = 0; j < 9; j++) {
+      if (i >= float(j) * step && i <= float(j + 1) * step) {
+        brightness = ascii[j];
+        break;
+      }
+    }
+
     gl_FragColor = vec4(vec3(brightness), 1.0);
   }
 `;
-
 
 
 const AsciiPyramid = () => {
@@ -44,19 +55,11 @@ const AsciiPyramid = () => {
 
     const pyramidGeometry = new THREE.ConeGeometry(1, 2, 4);
 
-
-    const loader = new THREE.TextureLoader();
-    const asciiTexture = loader.load("/ascii_chars.png");
-
     const material = new THREE.ShaderMaterial({
-      uniforms: {
-        lightPosition: { value: new THREE.Vector3(0, -5, 10) },
-        asciiTexture: { value: asciiTexture },
-      },
+      uniforms: { lightPosition: { value: new THREE.Vector3(0, -5, 10) } },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
-    });
-    
+    });    
     
     const pyramid = new THREE.Mesh(pyramidGeometry, material);
     scene.add(pyramid);
