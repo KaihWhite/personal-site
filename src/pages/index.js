@@ -3,13 +3,14 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import SpinningPyramid from '../components/SpinningPyramid';
-import AsciiPyramid from '../components/AsciiPyramid.js';
+//import SpinningPyramid from '../components/SpinningPyramid';
+//import AsciiPyramid from '../components/AsciiPyramid.js';
+import ShadedPyramid from '../components/ShadedPyramid';
 
 export default function Home() {
   return (
     <div className={styles.container}>
-      <AsciiPyramid/>
+      <ShadedPyramid/>
       <Head>
         <title>Homepage</title>
         <meta name="description" content="width=device-width, initial-scale=1.0" />
