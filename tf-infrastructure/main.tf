@@ -39,12 +39,12 @@ resource "aws_amplify_app" "personal-site" {
     phases:
       preBuild:
         commands:
-          - npm install
+          - npm ci
       build:
         commands:
           - npm run build
     artifacts:
-      baseDirectory: .next
+      baseDirectory: out
       files:
         - '**/*'
     cache:
