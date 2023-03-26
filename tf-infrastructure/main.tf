@@ -55,10 +55,11 @@ EOT
 
   # The default rewrites and redirects added by the Amplify Console.
   custom_rule {
-    source = "/<*>"
-    status = "404"
-    target = "/index.html"
-  }
+  source      = "</^[^.]+$|\\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|ttf|map|json)$)([^.]+$)/>"
+  target      = "/index.html"
+  status      = "200"
+  condition   = "404"
+}
 
   environment_variables = {
     ENV = "dev"
