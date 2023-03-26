@@ -9,10 +9,18 @@ terraform {
   required_version = ">= 1.2.0"
 }
 
+variable "access_key" {
+  description = "aws public access key"
+}
+
+variable "secret_key" {
+  description = "aws secret access key"
+}
+
 provider "aws" {
   region  = "us-west-2"
-  access_key  = "AKIA2Z7SETYLLCOVQBCS"
-  secret_key  = "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"
+  access_key  = vars.access_key
+  secret_key  = vars.secret_key
 }
 
 variable "github_token" {
