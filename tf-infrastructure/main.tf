@@ -39,32 +39,33 @@ resource "aws_amplify_app" "personal-site" {
     phases:
       preBuild:
         commands:
-          - npm ci
+          - yarn install
       build:
         commands:
-          - npm run build
+          - yarn export
     artifacts:
-      baseDirectory: .next
+      baseDirectory: out
       files:
         - '**/*'
     cache:
       paths:
         - node_modules/**/*
-        - .next/cache/**/*
-EOT
+  EOT
+
 
   custom_rule {
-  source      = "</^[^.]+$|\\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|ttf|map|json)$)([^.]+$)/>"
-  target      = "/index.html"
-  status      = "200"
-  condition   = "404"
+    source      = "</^[^.]+$/>"
+    target      = "/index.html"
+    status      = "200"
+    condition   = "404"
   }
 
   custom_rule {
-  source      = "/_next/static/<*>"
-  target      = "/_next/static/<*>"
-  status      = "200"
+    source      = "/_next/static/<*>"
+    target      = "/_next/static/<*>"
+    status      = "200"
   }
+
 
   environment_variables = {
     ENV = "dev"
