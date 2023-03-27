@@ -5,6 +5,7 @@ import * as THREE from 'three';
 const WobblingGlassOctahedron = () => {
   const canvasRef = useRef();
 
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
@@ -35,13 +36,25 @@ const WobblingGlassOctahedron = () => {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
 
-    camera.position.z = 3;
+    camera.position.z = 5;
 
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
+
+    const cursorPosition = new THREE.Vector3(10000, 10000, 10000); // Far away from the initial octahedron position
+    const repulsionForce = new THREE.Vector3();
+
+    const onMouseMove = (event) => {
+      const x = (event.clientX / window.innerWidth) * 2 - 1;
+      const y = -(event.clientY / window.innerHeight) * 2 + 1;
+      cursorPosition.set(x, y, 0.5).unproject(camera);
+    };
+    
+
+    window.addEventListener('mousemove', onMouseMove);  
 
     window.addEventListener('resize', onResize);
     onResize();
@@ -50,6 +63,41 @@ const WobblingGlassOctahedron = () => {
 
     const animate = () => {
       requestAnimationFrame(animate);
+
+      // Calculate the repulsion force
+      const distanceToOctahedron = camera.position.distanceTo(octahedron.position);
+      const distanceToCursor = camera.position.distanceTo(cursorPosition);
+      const distanceRatio = distanceToOctahedron / distanceToCursor;
+
+      const projectedCursorPosition = new THREE.Vector3().lerpVectors(camera.position, cursorPosition, distanceRatio);
+      const forceMagnitude = 0.1 / projectedCursorPosition.distanceTo(octahedron.position);
+      // const forceMagnitude = 0;
+      // if (projectedCursorPosition.distanceTo(octahedron.position) < 1){
+      //   const forceMagnitude = 1;
+      // }
+      repulsionForce.subVectors(projectedCursorPosition, octahedron.position).normalize().multiplyScalar(forceMagnitude);
+
+      // Apply the repulsion force
+      octahedron.position.x += repulsionForce.x;
+      octahedron.position.y += repulsionForce.y;
+      //octahedron.position.z += repulsionForce.z;
+
+      // Wrap around screen edges
+      const halfWidth = window.innerWidth / 2;
+      const halfHeight = window.innerHeight / 2;
+
+      if (octahedron.position.x < -halfWidth) {
+        octahedron.position.x += 2 * halfWidth;
+      } else if (octahedron.position.x > halfWidth) {
+        octahedron.position.x -= 2 * halfWidth;
+      }
+
+      if (octahedron.position.y < -halfHeight) {
+        octahedron.position.y += 2 * halfHeight;
+      } else if (octahedron.position.y > halfHeight) {
+        octahedron.position.y -= 2 * halfHeight;
+      }
+
 
       // Apply wobbling effect
       wobble += 0.01;
@@ -63,6 +111,7 @@ const WobblingGlassOctahedron = () => {
     animate();
 
     return () => {
+      window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('resize', onResize);
       renderer.dispose();
       glassMaterial.dispose();
