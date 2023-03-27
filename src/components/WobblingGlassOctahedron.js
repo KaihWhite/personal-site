@@ -70,12 +70,8 @@ const WobblingGlassOctahedron = () => {
       const distanceRatio = distanceToOctahedron / distanceToCursor;
 
       const projectedCursorPosition = new THREE.Vector3().lerpVectors(camera.position, cursorPosition, distanceRatio);
-      const forceMagnitude = 0.1 / projectedCursorPosition.distanceTo(octahedron.position);
-      // const forceMagnitude = 0;
-      // if (projectedCursorPosition.distanceTo(octahedron.position) < 1){
-      //   const forceMagnitude = 1;
-      // }
-      repulsionForce.subVectors(projectedCursorPosition, octahedron.position).normalize().multiplyScalar(forceMagnitude);
+      const forceMagnitude = 0.05 / projectedCursorPosition.distanceTo(octahedron.position);
+      repulsionForce.subVectors(octahedron.position, projectedCursorPosition).normalize().multiplyScalar(forceMagnitude);
 
       // Apply the repulsion force
       octahedron.position.x += repulsionForce.x;
@@ -83,19 +79,24 @@ const WobblingGlassOctahedron = () => {
       //octahedron.position.z += repulsionForce.z;
 
       // Wrap around screen edges
-      const halfWidth = window.innerWidth / 2;
-      const halfHeight = window.innerHeight / 2;
+      const frustumHeight = 2.0 * Math.tan(camera.fov * 0.5 * (Math.PI / 180)) * camera.position.z;
+      const frustumWidth = frustumHeight * camera.aspect;
+
+      const halfWidth = frustumWidth / 2;
+      const halfHeight = frustumHeight / 2;
+
+      const offset = 1.2;
 
       if (octahedron.position.x < -halfWidth) {
-        octahedron.position.x += 2 * halfWidth;
+        octahedron.position.x += 2 * halfWidth - offset;
       } else if (octahedron.position.x > halfWidth) {
-        octahedron.position.x -= 2 * halfWidth;
+        octahedron.position.x -= 2 * halfWidth - offset;
       }
 
       if (octahedron.position.y < -halfHeight) {
-        octahedron.position.y += 2 * halfHeight;
+        octahedron.position.y += 2 * halfHeight - offset;
       } else if (octahedron.position.y > halfHeight) {
-        octahedron.position.y -= 2 * halfHeight;
+        octahedron.position.y -= 2 * halfHeight - offset;
       }
 
 
