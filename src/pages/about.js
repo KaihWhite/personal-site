@@ -10,7 +10,7 @@ import WobblingGlassOctahedron from '../components/WobblingGlassOctahedron';
 export default function About() {
   return (
     <div className={styles.container}>
-        <WobblingGlassOctahedron />
+      <WobblingGlassOctahedron />
       <Head>
         <title>About Page</title>
         <meta name="description" content="About Page" />

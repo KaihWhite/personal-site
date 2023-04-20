@@ -2,6 +2,17 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
+// generates a random rotation for collisions
+function randomRotationPattern() {
+  const min = -50;
+  const max = 50;
+  const rotationX = Math.random() * (max - min) + min;
+  const rotationY = Math.random() * (max - min) + min;
+  const rotationZ = Math.random() * (max - min) + min;
+
+  return [rotationX, rotationY, rotationZ];
+}
+
 const WobblingGlassOctahedron = () => {
   const canvasRef = useRef();
 
@@ -24,8 +35,23 @@ const WobblingGlassOctahedron = () => {
       refractionRatio: 0.99,
     });
 
-    const octahedron = new THREE.Mesh(octahedronGeometry, glassMaterial);
-    scene.add(octahedron);
+    const numOctahedrons = 3; // Number of octahedrons
+    const octahedrons = []; // Array to store the octahedrons
+    const Zpos = 0; // z position of octahedrons
+    const rotations = []; // 2d array with all the octahedron's rotations
+
+    //might need to copy over what's inside onResize
+    let halfWidth = Math.tan(camera.fov * 0.5 * (Math.PI / 180)) * camera.position.z;
+    let halfHeight = halfWidth / camera.aspect;
+
+    // Create multiple octahedrons
+    for (let i = 0; i < numOctahedrons; i++) {
+      const octahedron = new THREE.Mesh(octahedronGeometry, glassMaterial);
+      octahedron.position.set(Math.random() * halfWidth * 2 - halfWidth, Math.random() * halfHeight * 2 - halfHeight, Zpos);
+      octahedrons.push(octahedron);
+      rotations.push(randomRotationPattern());
+      scene.add(octahedron);
+    }
 
     // Add point light
     const pointLight = new THREE.PointLight(0xffffff, 1, 100);
@@ -38,14 +64,34 @@ const WobblingGlassOctahedron = () => {
 
     camera.position.z = 5;
 
+    //defining the edges of the screen to allow the octahedron to bounch off of them
+    const screenBounds = new THREE.Box3(
+      new THREE.Vector3(-halfWidth, -halfHeight, Zpos - 1),
+      new THREE.Vector3(halfWidth, halfHeight, Zpos + 1)
+    );    
+
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+
+      const widthPadding = 2;
+      const bottomPadding = 1;
+    
+      halfWidth = Math.tan(camera.fov * 0.5 * (Math.PI / 180)) * camera.position.z;
+      halfHeight = halfWidth / camera.aspect;
+    
+      // Update screenBounds
+      screenBounds.min.set(-(halfWidth+widthPadding), -(halfHeight+bottomPadding), Zpos - 1);
+      screenBounds.max.set(halfWidth+widthPadding, halfHeight, Zpos + 1);
     };
 
+    
     const cursorPosition = new THREE.Vector3(10000, 10000, 10000); // Far away from the initial octahedron position
-    const repulsionForce = new THREE.Vector3();
+    const repulsionForces = Array(numOctahedrons).fill().map(() => new THREE.Vector3());
+
+    const interactionRadius = 1; // Adjust this value to control the interaction distance
+    const bounceFactor = 1; // Adjust this value to control the amount of bounce
 
     const onMouseMove = (event) => {
       const x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -59,54 +105,91 @@ const WobblingGlassOctahedron = () => {
     window.addEventListener('resize', onResize);
     onResize();
 
-    let wobble = 0;
-
+    let spinSpeed = 0.001;
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // Calculate the repulsion force
-      const distanceToOctahedron = camera.position.distanceTo(octahedron.position);
-      const distanceToCursor = camera.position.distanceTo(cursorPosition);
-      const distanceRatio = distanceToOctahedron / distanceToCursor;
+      octahedrons.forEach((octahedron, i) => {
 
-      const projectedCursorPosition = new THREE.Vector3().lerpVectors(camera.position, cursorPosition, distanceRatio);
-      const forceMagnitude = 0.05 / projectedCursorPosition.distanceTo(octahedron.position);
-      repulsionForce.subVectors(octahedron.position, projectedCursorPosition).normalize().multiplyScalar(forceMagnitude);
+        // Calculate the repulsion force
+        const distanceToOctahedron = camera.position.distanceTo(octahedron.position);
+        const distanceToCursor = camera.position.distanceTo(cursorPosition);
+        const distanceRatio = distanceToOctahedron / distanceToCursor;
 
-      // Apply the repulsion force
-      octahedron.position.x += repulsionForce.x;
-      octahedron.position.y += repulsionForce.y;
-      //octahedron.position.z += repulsionForce.z;
+        const projectedCursorPosition = new THREE.Vector3().lerpVectors(camera.position, cursorPosition, distanceRatio);
+        //const forceMagnitude = 0.05 / projectedCursorPosition.distanceTo(octahedron.position);
 
-      // Wrap around screen edges
-      const frustumHeight = 2.0 * Math.tan(camera.fov * 0.5 * (Math.PI / 180)) * camera.position.z;
-      const frustumWidth = frustumHeight * camera.aspect;
+        const distanceToProjectedCursor = projectedCursorPosition.distanceTo(octahedron.position);
+        if (distanceToProjectedCursor <= interactionRadius) {
+          repulsionForces[i].subVectors(octahedron.position, projectedCursorPosition).normalize().multiplyScalar(0.05);
+        } 
+        // else {
+        //   repulsionForces[i].set(0, 0, 0);
+        // }
 
-      const halfWidth = frustumWidth / 2;
-      const halfHeight = frustumHeight / 2;
-
-      const offset = 1.2;
-
-      if (octahedron.position.x < -halfWidth) {
-        octahedron.position.x += 2 * halfWidth - offset;
-      } else if (octahedron.position.x > halfWidth) {
-        octahedron.position.x -= 2 * halfWidth - offset;
-      }
-
-      if (octahedron.position.y < -halfHeight) {
-        octahedron.position.y += 2 * halfHeight - offset;
-      } else if (octahedron.position.y > halfHeight) {
-        octahedron.position.y -= 2 * halfHeight - offset;
-      }
+        //const previousForces = Array(numOctahedrons).fill().map(() => new THREE.Vector3());
+        
+        for (let j = 0; j < numOctahedrons; j++) {
+          if (j !== i) {
+            const otherOctahedron = octahedrons[j];
+            const distanceBetweenOctahedrons = octahedron.position.distanceTo(otherOctahedron.position);
+            const minDistance = (octahedron.geometry.parameters.radius + otherOctahedron.geometry.parameters.radius) * 1.1;
+      
+            if (distanceBetweenOctahedrons < minDistance) {
+              rotations[i] = randomRotationPattern();
 
 
-      // Apply wobbling effect
-      wobble += 0.01;
-      octahedron.rotation.x = Math.sin(wobble) * 0.1;
-      octahedron.rotation.y = Math.sin(wobble * 0.5) * 0.1;
-      octahedron.rotation.z = Math.sin(wobble * 0.3) * 0.1;
+              // repulsionForces[i].set(repulsionForces[i].addScalar(-1) * bounceFactor);
+              // repulsionForces[j].set(repulsionForces[i].addScalar(-1) * bounceFactor);
 
-      renderer.render(scene, camera);
+              const collisionForce = new THREE.Vector3().subVectors(octahedron.position, otherOctahedron.position).normalize().multiplyScalar(0.05*bounceFactor);
+              collisionForce.z = 0;
+              octahedron.position.add(collisionForce);
+              otherOctahedron.position.sub(collisionForce);
+            }
+          }
+        }
+
+
+        // Update the octahedron's world position
+        octahedron.updateMatrixWorld();
+        const worldPosition = new THREE.Vector3();
+        octahedron.getWorldPosition(worldPosition);
+
+        // Check if the octahedron is outside the screen bounds and reflect its position and velocity
+        if (!screenBounds.containsPoint(octahedron.position)) {
+          const bounceFactor = 1; // Adjust this value to control the amount of bounce
+          rotations[i] = randomRotationPattern();
+          if (octahedron.position.x < screenBounds.min.x || octahedron.position.x > screenBounds.max.x) {
+            repulsionForces[i].x = -repulsionForces[i].x * bounceFactor;
+            octahedron.position.x = Math.max(screenBounds.min.x, Math.min(octahedron.position.x, screenBounds.max.x));
+          }
+          if (octahedron.position.y < screenBounds.min.y || octahedron.position.y > screenBounds.max.y) {
+            repulsionForces[i].y = -repulsionForces[i].y * bounceFactor;
+            octahedron.position.y = Math.max(screenBounds.min.y, Math.min(octahedron.position.y, screenBounds.max.y));
+          }
+        }
+
+        // Apply the force
+        repulsionForces[i].z = 0;
+        octahedron.position.add(repulsionForces[i]);
+
+        // if (repulsionForces[i].length() > 0) {
+        //   octahedron.position.add(repulsionForces[i]);
+        //   previousForces[i].copy(repulsionForces[i]);
+        // } else {
+        //   octahedron.position.add(previousForces[i]);
+        // }
+
+        // Apply spinning effect
+        octahedron.rotation.x += spinSpeed*rotations[i][0];
+        octahedron.rotation.y += spinSpeed*rotations[i][1];
+        octahedron.rotation.z += spinSpeed*rotations[i][2];
+
+
+        });
+
+        renderer.render(scene, camera);
     };
 
     animate();
