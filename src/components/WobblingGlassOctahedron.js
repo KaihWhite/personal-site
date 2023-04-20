@@ -35,7 +35,7 @@ const WobblingGlassOctahedron = () => {
       refractionRatio: 0.99,
     });
 
-    const numOctahedrons = 3; // Number of octahedrons
+    const numOctahedrons = 6; // Number of octahedrons
     const octahedrons = []; // Array to store the octahedrons
     const Zpos = 0; // z position of octahedrons
     const rotations = []; // 2d array with all the octahedron's rotations
@@ -62,7 +62,7 @@ const WobblingGlassOctahedron = () => {
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
 
-    camera.position.z = 5;
+    camera.position.z = 10;
 
     //defining the edges of the screen to allow the octahedron to bounch off of them
     const screenBounds = new THREE.Box3(
@@ -75,15 +75,16 @@ const WobblingGlassOctahedron = () => {
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
 
-      const widthPadding = 2;
-      const bottomPadding = 1;
+      const widthPadding = 5.5;
+      const bottomPadding = 2.5;
+      const topPadding = 0.5;
     
       halfWidth = Math.tan(camera.fov * 0.5 * (Math.PI / 180)) * camera.position.z;
       halfHeight = halfWidth / camera.aspect;
     
       // Update screenBounds
       screenBounds.min.set(-(halfWidth+widthPadding), -(halfHeight+bottomPadding), Zpos - 1);
-      screenBounds.max.set(halfWidth+widthPadding, halfHeight, Zpos + 1);
+      screenBounds.max.set(halfWidth+widthPadding, halfHeight+topPadding, Zpos + 1);
     };
 
     
