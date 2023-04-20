@@ -35,7 +35,7 @@ const WobblingGlassOctahedron = () => {
       refractionRatio: 0.99,
     });
 
-    const numOctahedrons = 3; // Number of octahedrons
+    const numOctahedrons = 1; // Number of octahedrons
     const octahedrons = []; // Array to store the octahedrons
     const Zpos = 0; // z position of octahedrons
     const rotations = []; // 2d array with all the octahedron's rotations
