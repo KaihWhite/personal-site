@@ -13,6 +13,13 @@ function randomRotationPattern() {
   return [rotationX, rotationY, rotationZ];
 }
 
+// Generate a random small force
+function randomSmallForce() {
+  const min = -0.01;
+  const max = 0.01;
+  return Math.random() * (max - min) + min;
+}
+
 const WobblingGlassOctahedron = () => {
   const canvasRef = useRef();
 
@@ -47,7 +54,7 @@ const WobblingGlassOctahedron = () => {
     // Create multiple octahedrons
     for (let i = 0; i < numOctahedrons; i++) {
       const octahedron = new THREE.Mesh(octahedronGeometry, glassMaterial);
-      octahedron.position.set(Math.random() * halfWidth * 2 - halfWidth, Math.random() * halfHeight * 2 - halfHeight, Zpos);
+      octahedron.position.set((Math.random() * halfWidth) - halfWidth, (Math.random() * halfHeight) - halfHeight, Zpos);
       octahedrons.push(octahedron);
       rotations.push(randomRotationPattern());
       scene.add(octahedron);
@@ -124,11 +131,6 @@ const WobblingGlassOctahedron = () => {
         if (distanceToProjectedCursor <= interactionRadius) {
           repulsionForces[i].subVectors(octahedron.position, projectedCursorPosition).normalize().multiplyScalar(0.05);
         } 
-        // else {
-        //   repulsionForces[i].set(0, 0, 0);
-        // }
-
-        //const previousForces = Array(numOctahedrons).fill().map(() => new THREE.Vector3());
         
         for (let j = 0; j < numOctahedrons; j++) {
           if (j !== i) {
@@ -139,14 +141,17 @@ const WobblingGlassOctahedron = () => {
             if (distanceBetweenOctahedrons < minDistance) {
               rotations[i] = randomRotationPattern();
 
+              // Calculate the collision response
+              const collisionNormal = new THREE.Vector3().subVectors(octahedron.position, otherOctahedron.position).normalize();
+              const relativeVelocity = new THREE.Vector3().subVectors(repulsionForces[i], repulsionForces[j]);
+              const impulse = relativeVelocity.dot(collisionNormal);
+              const impulseVector = collisionNormal.clone().multiplyScalar(impulse);
 
-              // repulsionForces[i].set(repulsionForces[i].addScalar(-1) * bounceFactor);
-              // repulsionForces[j].set(repulsionForces[i].addScalar(-1) * bounceFactor);
+              // Update the velocities
+              repulsionForces[i].sub(impulseVector);
+              repulsionForces[j].add(impulseVector);
 
-              const collisionForce = new THREE.Vector3().subVectors(octahedron.position, otherOctahedron.position).normalize().multiplyScalar(0.05*bounceFactor);
-              collisionForce.z = 0;
-              octahedron.position.add(collisionForce);
-              otherOctahedron.position.sub(collisionForce);
+              
             }
           }
         }
