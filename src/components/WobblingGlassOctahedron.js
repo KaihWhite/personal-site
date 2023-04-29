@@ -42,12 +42,12 @@ const WobblingGlassOctahedron = () => {
       refractionRatio: 0.99,
     });
 
-    const numOctahedrons = 6; // Number of octahedrons
+    const numOctahedrons = 1; // Number of octahedrons
     const octahedrons = []; // Array to store the octahedrons
     const Zpos = 0; // z position of octahedrons
     const rotations = []; // 2d array with all the octahedron's rotations
 
-    //might need to copy over what's inside onResize
+    // finding size of window
     let halfWidth = Math.tan(camera.fov * 0.5 * (Math.PI / 180)) * camera.position.z;
     let halfHeight = halfWidth / camera.aspect;
 
@@ -82,16 +82,17 @@ const WobblingGlassOctahedron = () => {
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
 
-      const widthPadding = 5.5;
-      const bottomPadding = 2.5;
-      const topPadding = 0.5;
+      const widthPadding = 2;
+      const bottomPadding = 1;
+      const topPadding = 0;
+      const paddingScalar = 1.5;
     
       halfWidth = Math.tan(camera.fov * 0.5 * (Math.PI / 180)) * camera.position.z;
       halfHeight = halfWidth / camera.aspect;
     
       // Update screenBounds
-      screenBounds.min.set(-(halfWidth+widthPadding), -(halfHeight+bottomPadding), Zpos - 1);
-      screenBounds.max.set(halfWidth+widthPadding, halfHeight+topPadding, Zpos + 1);
+      screenBounds.min.set(-(halfWidth*paddingScalar+widthPadding), -(halfHeight*paddingScalar+bottomPadding), Zpos - 1);
+      screenBounds.max.set(halfWidth*paddingScalar+widthPadding, halfHeight*paddingScalar+topPadding, Zpos + 1);
     };
 
     
