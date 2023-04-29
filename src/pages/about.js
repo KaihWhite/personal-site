@@ -1,10 +1,11 @@
 // pages/about.js
 import Head from 'next/head';
-import styles from '../styles/Home.module.css';
+import styles from '../styles/about.module.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 //import RotatingLight from '../components/RotatingLight'
 import WobblingGlassOctahedron from '../components/WobblingGlassOctahedron';
+import AboutMeModal from '../components/AboutMeModal';
 
 
 export default function About() {
@@ -23,7 +24,7 @@ export default function About() {
       </header>
 
       <main>
-        <p>This is the About page.</p>
+        <AboutMeModal />
       </main>
 
       <Footer />

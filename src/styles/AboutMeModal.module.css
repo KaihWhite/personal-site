@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.bubble {
+  width: 200px;
+  height: 200px;
+  background-color: #000000;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  position: absolute;
+  top: 150px;
+  left: 0;
+  margin: 20px;
+  text-align: center;
+}
+
+.bubbleText {
+  padding: 20px;
+  color: #ffffff;
+}
