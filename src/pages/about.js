@@ -15,7 +15,7 @@ export default function About() {
       <Head>
         <title>About Page</title>
         <meta name="description" content="About Page" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/PrettyIcon.png" />
       </Head>
 
       <header className={styles.banner}>
