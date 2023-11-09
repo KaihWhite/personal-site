@@ -4,10 +4,13 @@ import styles from '../styles/Home.module.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Playground from '../components/Playground';
+import React from 'react';
+// TODO: incorperate framer motion or delete from project
 
+// Home page
 export default function Home() {
   return (
-    <div >
+    <div className={styles.home}>
       <Playground />
       <Head>
         <title>Homepage</title>
