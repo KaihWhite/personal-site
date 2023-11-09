@@ -3,7 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import styles from '../styles/playground.module.css'
 import React, { useEffect, useRef, useState } from 'react'
 import { MeshStandardMaterial, BoxBufferGeometry } from 'three';
-import Platformer from './Platformer';
+
 
 
 // Creates a pyramid object when called
