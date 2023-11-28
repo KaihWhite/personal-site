@@ -7,6 +7,34 @@ import { motion } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 
 
+// Jumping text animation
+const AnimatedName = ({ name }) => {
+  return (
+    <div style={{ display: 'inline-block' }}>
+      {name.split('').map((letter, index) => (
+        <motion.span
+          key={index}
+          animate={{
+            y: [0, -20, 0],
+            transition: {
+              duration: 0.5,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatDelay: 2.0,
+              delay: index * 0.1 // Staggered delay for each letter
+            }
+          }}
+          style={{ display: 'inline-block', marginRight: '2px' }}
+        >
+          {letter}
+        </motion.span>
+      ))}
+    </div>
+  );
+};
+
+
+// wireframe box 
 function Box() {
   const meshRef = React.useRef();
 
@@ -43,30 +71,6 @@ function intro() {
 
 // Home page
 export default function Home() {
-  const AnimatedName = ({ name }) => {
-    return (
-      <div style={{ display: 'inline-block' }}>
-        {name.split('').map((letter, index) => (
-          <motion.span
-            key={index}
-            animate={{
-              y: [0, -20, 0],
-              transition: {
-                duration: 0.5,
-                ease: "easeInOut",
-                repeat: Infinity,
-                repeatDelay: 2.0,
-                delay: index * 0.1 // Staggered delay for each letter
-              }
-            }}
-            style={{ display: 'inline-block', marginRight: '2px' }}
-          >
-            {letter}
-          </motion.span>
-        ))}
-      </div>
-    );
-  };
   
   return (
     <div className={styles.home}>
