@@ -80,6 +80,8 @@ export default function Home() {
         <link rel="icon" href="/PrettyIcon.png" />
       </Head>
 
+      
+
       <div className={styles.cubeContainer}>
         <Canvas >
           <ambientLight />
