@@ -1,9 +1,9 @@
 // pages/index.js
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion as m3 } from 'framer-motion-3d';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
 
 
@@ -37,19 +37,23 @@ const AnimatedName = ({ name }) => {
 // wireframe box 
 function Box() {
   const meshRef = React.useRef();
+  const { scrollYProgress } = useScroll();
+  const progress = useTransform(scrollYProgress, [0, 1], [0, 100])
 
   useFrame(() => {
     if (meshRef.current) {
-      meshRef.current.rotation.x += 0.0025;
-      meshRef.current.rotation.y += 0.005;
+      meshRef.current.rotation.x += 0.00125;
+      meshRef.current.rotation.y += 0.0025;
+      // meshRef.current.position.z = -progress;
+      // console.log(progress)
     }
   });
 
   return (
-    <mesh ref={meshRef} position={[0, 0, 0]}>
+    <m3.mesh ref={meshRef} position={[0, 0, 0]}>
       <boxBufferGeometry geometry='geometry' args={[3, 3, 3]}/>
       <meshStandardMaterial wireframe color="white"/>
-    </mesh>
+    </m3.mesh>
   );
 }
 
