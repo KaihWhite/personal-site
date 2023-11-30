@@ -44,8 +44,8 @@ function Box() {
     if (meshRef.current) {
       meshRef.current.rotation.x += 0.00125;
       meshRef.current.rotation.y += 0.0025;
-      // meshRef.current.position.z = -progress;
-      // console.log(progress)
+      meshRef.current.position.z = -progress.current * 10;
+      // console.log(progress.current)
     }
   });
 
