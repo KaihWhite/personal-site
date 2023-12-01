@@ -3,8 +3,8 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import React, { useEffect } from 'react';
 import { motion as m3 } from 'framer-motion-3d';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { m, motion, useScroll, useTransform } from 'framer-motion';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 
 
 // Jumping text animation
@@ -58,18 +58,25 @@ function Box() {
 }
 
 
-// Intro
-function intro() {
+// Explosion animation
+function explosion() {
+  const Model = () => {
+    const gltf = useLoader(GLTFLoader, "./scene.gltf")
+    return (
+        <>
+            <primitive position={[0, 0, 0]} object={gltf.scene} scale={1} />
+        </>
+    );
+ };
   return (
-    <div className={styles.intro}>
-      <div style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px', right: '25px' }}>
-        Hello there,
-      </div>
-      <div style={{ fontSize: '36px', fontWeight: 'bold', position: 'relative', top: '0px', left: '300px' }}>
-        my name is <AnimatedName name="Kaih White" />
-      </div>
+    <div>
+      <Canvas>
+        <ambientLight />
+        <pointLight position={[10, 10, 10]} />
+        <Model />
+      </Canvas>
     </div>
-  );
+  ); 
 }
 
 
