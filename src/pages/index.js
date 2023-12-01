@@ -76,13 +76,27 @@ function explosion() {
         <Model />
       </Canvas>
     </div>
+  );
+}
+
+
+// Intro
+function Intro() {
+  return (
+    <div className={styles.intro}>
+      <div style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px'}}>
+        Hello there,
+      </div>
+      <div style={{ fontSize: '36px', fontWeight: 'bold', position: 'relative', top: '0px', paddingLeft:'1rem'}}>
+        <br/><br/>my name is <AnimatedName name="Kaih White" />
+      </div>
+    </div>
   ); 
 }
 
 
 // Home page
 export default function Home() {
-  
   return (
     <div className={styles.home}>
       <Head>
@@ -103,14 +117,8 @@ export default function Home() {
       <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}>
 
       </motion.div> 
-
-      <div className={styles.intro}>
-        <div style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px', right: '25px' }}>
-          Hello there,
-        </div>
-        <div style={{ fontSize: '36px', fontWeight: 'bold', position: 'relative', top: '0px', left: '300px' }}>
-          my name is <AnimatedName name="Kaih White" />
-        </div>
+      <div style={{position: 'relative', display:'flex', width:'100vw', height:'100vh', justifyContent:'center', alignItems:'center'}}>
+        <Intro />
       </div>
     </div>
   );

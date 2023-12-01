@@ -12,12 +12,8 @@
   color: white;
   font-size: 2rem;
   text-align: center;
-  width: 50vh;
-  height: 20vh;
   display: flex;
-  left: 25%;
-  top: 5%;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   position: relative; 
