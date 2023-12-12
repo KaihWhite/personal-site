@@ -3,7 +3,7 @@ import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import React, { useEffect } from 'react';
 import { motion as m3 } from 'framer-motion-3d';
-import { m, motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 
 
@@ -61,7 +61,7 @@ function Box() {
 // Explosion animation
 function explosion() {
   const Model = () => {
-    const gltf = useLoader(GLTFLoader, "./scene.gltf")
+    //const gltf = useLoader(GLTFLoader, "./scene.gltf")
     return (
         <>
             <primitive position={[0, 0, 0]} object={gltf.scene} scale={1} />
@@ -94,6 +94,17 @@ function Intro() {
   ); 
 }
 
+function About() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', zIndex: '1' }}>
+      <img style={{width: '150px', height: 'auto', transform: 'rotate(90deg)'}} src="/Me.png" alt="A picture of yours" />
+      <div>
+        About me goes here
+      </div>
+    </div>
+  );
+}
+
 
 // Home page
 export default function Home() {
@@ -114,12 +125,11 @@ export default function Home() {
         </Canvas>
       </div>
 
-      <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }}>
-
-      </motion.div> 
       <div style={{position: 'relative', display:'flex', width:'100vw', height:'100vh', justifyContent:'center', alignItems:'center'}}>
         <Intro />
       </div>
+
+      <About />
     </div>
   );
 }
