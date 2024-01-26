@@ -45,7 +45,14 @@ function Box() {
       meshRef.current.rotation.x += 0.00125;
       meshRef.current.rotation.y += 0.0025;
       meshRef.current.position.z = -progress.current * 10;
-      // console.log(progress.current)
+      console.log(progress.current);
+      
+      if (progress.current > 13) {
+        meshRef.current.visible = false;
+      }
+      else {
+        meshRef.current.visible = true;
+      }
     }
   });
 
@@ -58,24 +65,12 @@ function Box() {
 }
 
 
-// Explosion animation
-function explosion() {
-  const Model = () => {
-    //const gltf = useLoader(GLTFLoader, "./scene.gltf")
-    return (
-        <>
-            <primitive position={[0, 0, 0]} object={gltf.scene} scale={1} />
-        </>
-    );
- };
+// Component to create a link with an icon
+function IconLink({ href, iconPath }) {
   return (
-    <div>
-      <Canvas>
-        <ambientLight />
-        <pointLight position={[10, 10, 10]} />
-        <Model />
-      </Canvas>
-    </div>
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block' }}>
+      <img src={iconPath} alt="icon" style={{ width: '30px', height: '30px' }} />
+    </a>
   );
 }
 
@@ -95,16 +90,32 @@ function Intro() {
 }
 
 function About() {
+  const meshRef = React.useRef();
+  const { scrollYProgress } = useScroll();
+  const progress = useTransform(scrollYProgress, [0, 1], [0, 100])
+
+  useEffect(() => {
+    
+  });
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', zIndex: '1' }}>
-      <img style={{width: '150px', height: 'auto', transform: 'rotate(90deg)'}} src="/Me.png" alt="A picture of yours" />
-      <div>
-        About me goes here
+    <div>
+      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', paddingBottom: '30px'}}>
+        <motion.div style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px' }}>Who am I?</motion.div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '1', flexDirection: 'row', padding: '0 20px'}}>
+        <div style={{width: '50%', maxWidth: '300px'}}> {/* Explicit width for image container */}
+          <img style={{width: '100%', height: 'auto', objectFit: 'contain'}} src="/Me.png" alt="Me!" />
+        </div>
+        <div style={{width: '50%', padding: '0 20px'}}> {/* Explicit width for paragraph container */}
+          <p style={{fontSize: '25px'}}>
+            I am a software engineer with a passion for creating and learning interactive experiences. I have experience with full stack website development as well as game engine development.
+          </p>
+        </div>
       </div>
     </div>
   );
 }
-
 
 // Home page
 export default function Home() {
