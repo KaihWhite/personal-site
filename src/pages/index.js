@@ -44,21 +44,20 @@ function Box() {
     if (meshRef.current) {
       meshRef.current.rotation.x += 0.00125;
       meshRef.current.rotation.y += 0.0025;
-      meshRef.current.position.z = -progress.current * 10;
-      console.log(progress.current);
+      meshRef.current.position.z = -progress.current;
       
-      if (progress.current > 13) {
-        meshRef.current.visible = false;
-      }
-      else {
-        meshRef.current.visible = true;
-      }
+      // if (progress.current > 50) {
+      //   meshRef.current.visible = false;
+      // }
+      // else {
+      //   meshRef.current.visible = true;
+      // }
     }
   });
 
   return (
     <m3.mesh ref={meshRef} position={[0, 0, 0]}>
-      <boxBufferGeometry geometry='geometry' args={[3, 3, 3]}/>
+      <boxBufferGeometry geometry='geometry' args={[3.5, 3.5, 3.5]}/>
       <meshStandardMaterial wireframe color="white"/>
     </m3.mesh>
   );
@@ -90,14 +89,6 @@ function Intro() {
 }
 
 function About() {
-  const meshRef = React.useRef();
-  const { scrollYProgress } = useScroll();
-  const progress = useTransform(scrollYProgress, [0, 1], [0, 100])
-
-  useEffect(() => {
-    
-  });
-
   return (
     <div>
       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', paddingBottom: '30px'}}>
@@ -122,7 +113,7 @@ export default function Home() {
   return (
     <div className={styles.home}>
       <Head>
-        <title>Welcome</title>
+        <title>Meet Kaih White</title>
         <meta name="description" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/PrettyIcon.png" />
       </Head>
@@ -141,6 +132,10 @@ export default function Home() {
       </div>
 
       <About />
+      <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '2', flexDirection: 'row', padding: '10px'}}>
+        <IconLink href="https://github.com/KaihWhite" iconPath="/github.png" />
+        <IconLink href="https://www.linkedin.com/in/kaihwhite/" iconPath="/linkedin.png" />
+      </div>
     </div>
   );
 }
