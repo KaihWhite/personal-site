@@ -96,7 +96,7 @@ function About() {
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '1', flexDirection: 'row', padding: '0 20px'}}>
         <div style={{width: '50%', maxWidth: '300px'}}> {/* Explicit width for image container */}
-          <img style={{width: '100%', height: 'auto', objectFit: 'contain'}} src="/Me.png" alt="Me!" />
+          <img style={{width: '100%', height: 'auto', objectFit: 'contain'}} src="/me.PNG" alt="Me!" />
         </div>
         <div style={{width: '50%', padding: '0 20px'}}> {/* Explicit width for paragraph container */}
           <p style={{fontSize: '25px'}}>
