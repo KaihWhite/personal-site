@@ -3,6 +3,7 @@
     justify-content: flex-end;
     width: 100%;
     padding-right: 0; /* Add right padding */
+    height: 0px;
   }
   
   .navList {

@@ -10,11 +10,6 @@ const Navbar = () => {
             Home
           </Link>
         </li>
-        <li className={styles.navItem}>
-          <Link href="/about" className={styles.navLink}>
-            About
-          </Link>
-        </li>
       </ul>
     </nav>
   );
