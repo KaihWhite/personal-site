@@ -103,7 +103,7 @@ function About() {
         </div>
         <div style={{width: '50%', padding: '0 20px'}}> {/* Explicit width for paragraph container */}
           <p style={{fontSize: '25px'}}>
-            I am a software engineer with a passion for creating and learning interactive experiences. I have experience with full stack website development as well as game engine development.
+            I am a software engineer with a passion for creating interactive experiences. I have experience with full stack website development as well as game engine development.
           </p>
         </div>
       </div>
