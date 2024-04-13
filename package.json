@@ -14,6 +14,7 @@
     "@types/node": "18.15.0",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
+    "exif-js": "^2.3.0",
     "framer-motion": "^10.16.4",
     "framer-motion-3d": "^10.16.4",
     "next": "13.2.4",

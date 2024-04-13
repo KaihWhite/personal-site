@@ -5,6 +5,7 @@ import React, { useEffect } from 'react';
 import { motion as m3 } from 'framer-motion-3d';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
+// import ImageComponent from '../components/ImageComponent';
 
 
 // Jumping text animation
@@ -89,6 +90,7 @@ function Intro() {
 }
 
 function About() {
+
   return (
     <div>
       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', paddingBottom: '30px'}}>
@@ -96,7 +98,8 @@ function About() {
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '1', flexDirection: 'row', padding: '0 20px'}}>
         <div style={{width: '50%', maxWidth: '300px'}}> {/* Explicit width for image container */}
-          <img style={{width: '100%', height: 'auto', objectFit: 'contain'}} src="/me.PNG" alt="Me!" />
+          <img style={{width: '100%', height: 'auto', objectFit: 'contain', transform: 'rotate(0deg)'}} src="/me.PNG" alt="Me!" />
+          {/* <ImageComponent imageName="me.png" /> */}
         </div>
         <div style={{width: '50%', padding: '0 20px'}}> {/* Explicit width for paragraph container */}
           <p style={{fontSize: '25px'}}>
@@ -114,7 +117,8 @@ export default function Home() {
     <div className={styles.home}>
       <Head>
         <title>Meet Kaih White</title>
-        <meta name="description" content="width=device-width, initial-scale=1.0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Hello there!" />
         <link rel="icon" href="/PrettyIcon.png" />
       </Head>
 
