@@ -116,8 +116,8 @@ export default function Home() {
     <div className={styles.home}>
       <Head>
         <title>Meet Kaih White</title>
-        {/* <meta name="viewport" content="width=device-width, initial-scale=1.0" /> */}
-        <meta name="description" content="Hello there! Welcome to my site." />
+        <meta name="description" content="Hello there! Welcome to Kaih's site." />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/PrettyIcon.png" />
       </Head>
 
