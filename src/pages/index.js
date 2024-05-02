@@ -101,8 +101,10 @@ function About() {
           {/* <ImageComponent imageName="me.png" /> */}
         </div>
         <div style={{width: '50%', padding: '0 20px'}}> {/* Explicit width for paragraph container */}
-          <p style={{fontSize: '25px'}}>
-            I am a software engineer with a passion for creating interactive experiences. I have experience with full stack website development as well as game engine development.
+          <p style={{fontSize: '22px'}}>
+            I am a self aclaimed 'hacker' who grew up playing games on systems that were before my time, and I wanted to know everything about how they worked. 
+            It all started with learning to run emulators and modifying a game's code/memory to experiment with the game's mechanics. I didn't realize it then, but I was learning the basics of reverse engineering and software development. 
+            To this day I still love experimenting with software and hardware, and I am always looking for new things to learn.
           </p>
         </div>
       </div>
