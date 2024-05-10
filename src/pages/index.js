@@ -120,7 +120,7 @@ export default function Home() {
         <title>Meet Kaih White</title>
         <meta name="description" content="Hello there! Welcome to Kaih's site." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="/PrettyIcon.png" />
+        <link rel="icon" href="/THIS_IS_IT.png" />
       </Head>
 
       
