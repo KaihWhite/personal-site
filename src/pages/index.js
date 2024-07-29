@@ -6,6 +6,8 @@ import { motion as m3 } from 'framer-motion-3d';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 
+import Menu from '../components/Menu';
+
 
 // Jumping text animation
 const AnimatedName = ({ name }) => {
@@ -102,9 +104,9 @@ function About() {
         </div>
         <div style={{width: '50%', padding: '0 20px'}}> {/* Explicit width for paragraph container */}
           <p style={{fontSize: '22px'}}>
-            I am a self aclaimed 'hacker' who grew up playing games on systems that were before my time, and I wanted to know everything about how they worked. 
-            It all started with learning to run emulators and modifying a game's code/memory to experiment with the game's mechanics. I didn't realize it then, but I was learning the basics of reverse engineering and software development. 
-            To this day I still love experimenting with software and hardware, and I am always looking for new things to learn.
+            I am a tinkerer who grew up on systems that were before my time and got to see the information revolution unfold before my eyes. Every system has always been a magical black box waiting to have its contents emptied.
+            It all started with modifying game code to find exploits and dissesemlbing electric skateboards to replace components for friends. I didn't realize it, but I was practicing my ability to reverse engineer and
+            understand systems. My fascination with systems and solutions only grows with every opportunity I have had to work on complex topics and diverse problems.
           </p>
         </div>
       </div>
@@ -141,6 +143,7 @@ export default function Home() {
         <IconLink href="https://github.com/KaihWhite" iconPath="/github.png" />
         <IconLink href="https://www.linkedin.com/in/kaihwhite/" iconPath="/linkedin.png" />
       </div>
+      <Menu style={{position: 'fixed', top: '0', right: '0'}}/>
     </div>
   );
 }

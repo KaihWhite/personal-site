@@ -1,0 +1,23 @@
+.menuContainer {
+    position: relative;
+  }
+  
+  .menuPhoto {
+    cursor: pointer;
+  }
+  
+  .menuLinks {
+    display: none;
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .menuLinks li {
+    margin: 10px 0;
+  }
+  
+  .menuLinks li a {
+    text-decoration: none;
+    color: #000;
+  }
+  
