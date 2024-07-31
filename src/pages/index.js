@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 
 import Menu from '../components/Menu';
+import Portfolio from './portfolio';
 
 
 // Jumping text animation
@@ -99,7 +100,7 @@ function About() {
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '1', flexDirection: 'row', padding: '0 20px'}}>
         <div style={{width: '50%', maxWidth: '300px'}}> {/* Explicit width for image container */}
-          <img style={{width: '100%', height: 'auto', objectFit: 'contain', transform: 'rotate(0deg)'}} src="/me.PNG" alt="Me!" />
+          <img style={{width: '100%', height: 'auto', objectFit: 'contain', transform: 'rotate(0deg)'}} src="/me.PNG" alt="Picture of me" />
           {/* <ImageComponent imageName="me.png" /> */}
         </div>
         <div style={{width: '50%', padding: '0 20px'}}> {/* Explicit width for paragraph container */}
@@ -125,8 +126,6 @@ export default function Home() {
         <link rel="icon" href="/THIS_IS_IT.png" />
       </Head>
 
-      
-
       <div className={styles.cubeContainer}>
         <Canvas >
           <ambientLight />
@@ -134,16 +133,19 @@ export default function Home() {
         </Canvas>
       </div>
 
-      <div style={{position: 'relative', display:'flex', width:'100vw', height:'100vh', justifyContent:'center', alignItems:'center'}}>
+      <div style={{position: 'relative', display: 'flex', paddingBottom: '50%', paddingTop: '25%', justifyContent:'center', alignItems:'center', overflow: 'hidden'}}>
         <Intro />
       </div>
 
       <About />
+
+      <Portfolio />
+
       <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '2', flexDirection: 'row', padding: '10px'}}>
         <IconLink href="https://github.com/KaihWhite" iconPath="/github.png" />
         <IconLink href="https://www.linkedin.com/in/kaihwhite/" iconPath="/linkedin.png" />
       </div>
-      <Menu style={{position: 'fixed', top: '0', right: '0'}}/>
+
     </div>
   );
 }
