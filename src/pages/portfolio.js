@@ -10,8 +10,8 @@ function Project({ title, description, imgPath, link }) {
         <div style={{paddingBottom: '2%'}}>
             <h2 style={{justifyContent: 'center', alignItems: 'center'}}>{title}</h2>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
-              <img src={imgPath} alt="project" onClick={openLink} style={{maxWidth: '50vh', height: 'auto'}}/>
-              <div style={{paddingLeft: '1%', width: '300px', height: '200px', paddingTop: '15%'}}>
+              <img src={imgPath} alt="project" style={{maxWidth: '50vh', height: 'auto'}}/>
+              <div style={{paddingLeft: '2%', width: '300px', height: '200px', paddingTop: '5%'}}>
                 <p style={{}}>{description}</p>
               </div>
             </div>
@@ -25,19 +25,22 @@ export default function Portfolio() {
             <h1 style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px', paddingBottom: '5%'}}>Portfolio</h1>
             <Project 
                 title="Lead Graphics Engineer"
-                description="Created a game engine from the ground up using C++ and OpenGL"
+                description="Created a game engine from the ground up using C++ and OpenGL while acting as the lead engineer for a team of 3.
+                Greatly improved my understanding of graphics programming and optimizing for hardware."
                 imgPath="Start_Your_Engine_Logo.jpeg"
                 link="https://github.com/KaihWhite/Start-Your-Engine" />
                 
             <Project
                 title="Lead Fullstack Engineer"
-                description="Created on-demand legal services app using React Native to connect clients with lawyers anywhere in the US."
+                description="Created an on-demand legal service web app to connect clients with lawyers anywhere in the US via video call.
+                Acted as lead engineer for a team of 7 and used the AWS CDK to design a serverless architecture using Python and React."
                 imgPath="SpeedyLegalLogo.png"
                 link="https://www.google.com" />
 
             <Project
                 title="Software Development Engineer Intern"
-                description="Worked as a software development engineer intern on the AWS Customer Experience team."
+                description="Interned as a software development engineer on the AWS Customer Experience team and learned how to build cloud-native applications using AWS services.
+                Specifcally, I worked on migrating a legacy AWS feature to a serverless architecture using the AWS CDK and Javascript."
                 imgPath="AWS_logo.png"
                 link="https://www.google.com" />
         </div>

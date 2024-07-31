@@ -107,7 +107,7 @@ function About() {
           <p style={{fontSize: '22px'}}>
             I am a tinkerer who grew up on systems that were before my time and got to see the information revolution unfold before my eyes. Every system has always been a magical black box waiting to have its contents emptied.
             It all started with modifying game code to find exploits and dissesemlbing electric skateboards to replace components for friends. I didn't realize it, but I was practicing my ability to understand systems and reverse engineer them.
-            My fascination with systems and solutions only grows with every opportunity I have had to work on complex topics and diverse problems.
+            My fascination with systems and solutions only grows with every opportunity I have to work on complex topics and diverse problems.
           </p>
         </div>
       </div>
