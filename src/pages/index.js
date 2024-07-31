@@ -133,7 +133,7 @@ export default function Home() {
         </Canvas>
       </div>
 
-      <div style={{position: 'relative', display: 'flex', paddingBottom: '50%', paddingTop: '25%', justifyContent:'center', alignItems:'center', overflow: 'hidden'}}>
+      <div style={{position: 'relative', display: 'flex', paddingBottom: '25%', paddingTop: '25%', justifyContent:'center', alignItems:'center', overflow: 'hidden'}}>
         <Intro />
       </div>
 
