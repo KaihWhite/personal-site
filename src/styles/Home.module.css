@@ -5,6 +5,8 @@
   margin: 0;
   padding: 0;
   background-color:black;
+  overflow: hidden;
+  height: auto;
 }
 
 .intro {
@@ -25,6 +27,7 @@
   width: 100%;
   height: 100vh;
   z-index: 0;
+  overflow: hidden;
 }
 
 @keyframes jump {
