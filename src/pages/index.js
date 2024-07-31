@@ -7,6 +7,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 
 import Menu from '../components/Menu';
+import Portfolio from './portfolio';
 
 
 // Jumping text animation
@@ -105,8 +106,8 @@ function About() {
         <div style={{width: '50%', padding: '0 20px'}}> {/* Explicit width for paragraph container */}
           <p style={{fontSize: '22px'}}>
             I am a tinkerer who grew up on systems that were before my time and got to see the information revolution unfold before my eyes. Every system has always been a magical black box waiting to have its contents emptied.
-            It all started with modifying game code to find exploits and dissesemlbing electric skateboards to replace components for friends. I didn't realize it, but I was practicing my ability to reverse engineer and
-            understand systems. My fascination with systems and solutions only grows with every opportunity I have had to work on complex topics and diverse problems.
+            It all started with modifying game code to find exploits and dissesemlbing electric skateboards to replace components for friends. I didn't realize it, but I was practicing my ability to understand systems and reverse engineer them.
+            My fascination with systems and solutions only grows with every opportunity I have had to work on complex topics and diverse problems.
           </p>
         </div>
       </div>
@@ -134,16 +135,18 @@ export default function Home() {
         </Canvas>
       </div>
 
-      <div style={{position: 'relative', display:'flex', width:'100vw', height:'100vh', justifyContent:'center', alignItems:'center'}}>
+      <div style={{position: 'relative', display:'flex', width:'100vw', height:'100vh', justifyContent:'center', alignItems:'center', overflow: 'hidden'}}>
         <Intro />
       </div>
 
       <About />
+
+      <Portfolio />
+
       <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '2', flexDirection: 'row', padding: '10px'}}>
         <IconLink href="https://github.com/KaihWhite" iconPath="/github.png" />
         <IconLink href="https://www.linkedin.com/in/kaihwhite/" iconPath="/linkedin.png" />
       </div>
-      <Menu style={{position: 'fixed', top: '0', right: '0'}}/>
     </div>
   );
 }

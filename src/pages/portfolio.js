@@ -1,54 +1,27 @@
 import React from 'react';
 
 function Project({ title, description, imgPath, link }) {
+    const handleClick = () => {
+        window.open(link, '_blank');
+    }
     return (
-        <div>
+        <div style={{paddingBottom: '5vw'}}>
             <h2>{title}</h2>
             <p>{description}</p>
-            <img src={imgPath} alt="project" onClick={window.open(link, '_blank')}/>
+            <img src={imgPath} alt="project" onClick={handleClick} style={{ maxWidth: '50vw', height: 'auto' }}/>
         </div>
     );
-}
-
-function Portfolio() {
-    return (
-        <div>
-            <h1>Portfolio</h1>
-            <p>My portfolio will go here.</p>
-        </div>
-    );
-
 }
 
 // portfolio page
 export default function Portfolio() {
     return (
-      <div className={styles.home}>
-        <Head>
-          <title>Kaih White's Portfolio</title>
-          <meta name="description" content="Where I showcase my previous works." />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <link rel="icon" href="/THIS_IS_IT.png" />
-        </Head>
-  
-        
-        {/* If I turn the rotating wireframe cube into a component, I can use it here. */}
-        {/* <div className={styles.cubeContainer}>
-          <Canvas >
-            <ambientLight />
-            <Box />
-          </Canvas>
-        </div> */}
-  
-        <div style={{position: 'relative', display:'flex', width:'100vw', height:'100vh', justifyContent:'center', alignItems:'center'}}>
-          <Portfolio />
+        <div style={{display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
+            <h1 style={{paddingTop: '10vh', paddingBottom: '10vh', justifyContent: 'center', alignItems: 'center', width: '100vw', textAlign: 'center'}}>Portfolio</h1>
+            <div style={{position: 'relative', display:'flex', width:'100vw', height:'auto', justifyContent:'center', alignItems:'center', flexDirection: 'column'}}>
+                <Project title="Start Your Engine" description="Created a game engine from scratch using C++ and OpenGL." imgPath="StartYourEngine_Screenshot.png" link=""  />
+                <Project title="Speedy Legal" description="Developed an on-demand legal service allowing customers to contact lawyers from anywhere in the US." imgPath="" link=""  />
+            </div>
         </div>
-  
-        <About />
-        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '2', flexDirection: 'row', padding: '10px'}}>
-          <IconLink href="https://github.com/KaihWhite" iconPath="/github.png" />
-          <IconLink href="https://www.linkedin.com/in/kaihwhite/" iconPath="/linkedin.png" />
-        </div>
-      </div>
     );
-  }
+  };

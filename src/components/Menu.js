@@ -10,7 +10,7 @@ export default function Menu(){
       <img src="white_menu.png" alt="Menu Icon" className={styles.menuPhoto} onClick={() => setIsOpen(!isOpen)} />
       {isOpen ? (
         <ul className={styles.menuLinks}>
-          <li><a href="page1.html">Page 1</a></li>
+          <li><a href="page1.html">Home</a></li>
           <li><a href="page2.html">Page 2</a></li>
           <li><a href="page3.html">Page 3</a></li>
         </ul>
