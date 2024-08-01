@@ -22,7 +22,7 @@ function Project({ title, description, imgPath, link }) {
 export default function Portfolio() {
     return (
         <div style={{position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', paddingTop: '10%'}}>
-            <h1 style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px', paddingBottom: '5%'}}>Portfolio</h1>
+            <h1 style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px', paddingBottom: '5%'}}>Work Experience</h1>
             <Project 
                 title="Lead Graphics Engineer"
                 description="Created a game engine from the ground up using C++ and OpenGL while acting as the lead engineer for a team of 3.
