@@ -2,12 +2,13 @@
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import React, { useEffect } from 'react';
+
 import { motion as m3 } from 'framer-motion-3d';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 
 import Menu from '../components/Menu';
-import Portfolio from './portfolio';
+import WorkExperience from './work_experience';
 
 
 // Jumping text animation
@@ -121,6 +122,8 @@ export default function Home() {
         <link rel="icon" href="/THIS_IS_IT.png" />
       </Head>
 
+      <Menu />
+
       <div className={styles.cubeContainer}>
         <Canvas >
           <ambientLight />
@@ -132,7 +135,7 @@ export default function Home() {
 
       <About />
 
-      <Portfolio />
+      <WorkExperience />
 
       <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '2', flexDirection: 'row', paddingBottom: '10px'}}>
         <IconLink href="https://github.com/KaihWhite" iconPath="/github.png" />

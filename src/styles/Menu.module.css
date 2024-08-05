@@ -1,23 +1,41 @@
 .menuContainer {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    justify-content: right;
+    align-items: right;
+    z-index: 1;
   }
   
   .menuPhoto {
     cursor: pointer;
+    max-width: 32px;
+    position: fixed;
+    top: 0;
+    right: 0;
   }
   
   .menuLinks {
-    display: none;
     list-style-type: none;
-    padding: 0;
+    color: #ffffff;
+    position: fixed;
+    top: 0;
+    right: 0;
+    margin: 0px 48px;
+    display: flex;
+    flex-direction: row;
   }
   
   .menuLinks li {
     margin: 10px 0;
+    color: #ffffff;
+    padding: 0 5px;
   }
   
-  .menuLinks li a {
+  .menuLinks li Link {
     text-decoration: none;
-    color: #000;
+    color: #ffffff;
+    z-index: 2;
   }
   
