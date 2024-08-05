@@ -95,21 +95,16 @@ function About() {
 
   return (
     <div>
-      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', paddingBottom: '30px'}}>
+      <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center'}}>
         <motion.div style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px' }}>Who am I?</motion.div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '1', flexDirection: 'row', padding: '0 20px'}}>
-        <div style={{width: '50%', maxWidth: '300px'}}> {/* Explicit width for image container */}
-          <img style={{width: '100%', height: 'auto', objectFit: 'contain', transform: 'rotate(0deg)'}} src="/me.PNG" alt="Picture of me" />
-          {/* <ImageComponent imageName="me.png" /> */}
-        </div>
-        <div style={{width: '50%', padding: '0 20px'}}> {/* Explicit width for paragraph container */}
-          <p style={{fontSize: '22px'}}>
-            I am a tinkerer who grew up on systems that were before my time and got to see the information revolution unfold before my eyes. Every system has always been a magical black box waiting to have its contents emptied.
-            It all started with modifying game code to find exploits and dissesemlbing electric skateboards to replace components for friends. I didn't realize it, but I was practicing my ability to understand systems and reverse engineer them.
-            My fascination with systems and solutions only grows with every opportunity I have to work on complex topics and diverse problems.
-          </p>
-        </div>
+      <div style={{ display: 'flex', alignItems: 'flex-start', padding: '5%'}}>
+        <img style={{maxWidth: '300px', marginRight: '20px', height: 'auto', objectFit: 'contain', transform: 'rotate(0deg)', float: 'left'}} src="/me.PNG" alt="Picture of me" />
+        <p style={{fontSize: '22px', marginTop: '5%'}}>
+          I am a tinkerer who grew up on systems that were before my time and got to see the information revolution unfold before my eyes. Every system has always been a magical black box waiting to have its contents emptied.
+          It all started with modifying game code to find exploits and dissesemlbing electric skateboards to replace components for friends. I didn't realize it, but I was practicing my ability to understand systems and reverse engineer them.
+          My fascination with systems and solutions only grows with every opportunity I have to work on complex topics and diverse problems.
+        </p>
       </div>
     </div>
   );
@@ -139,7 +134,7 @@ export default function Home() {
 
       <Portfolio />
 
-      <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '2', flexDirection: 'row', padding: '10px'}}>
+      <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '2', flexDirection: 'row', paddingBottom: '10px'}}>
         <IconLink href="https://github.com/KaihWhite" iconPath="/github.png" />
         <IconLink href="https://www.linkedin.com/in/kaihwhite/" iconPath="/linkedin.png" />
       </div>

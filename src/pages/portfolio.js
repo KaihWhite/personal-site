@@ -7,7 +7,7 @@ function Project({ title, description, imgPath, link }) {
   }
 
     return (
-        <div style={{paddingBottom: '4%'}}>
+        <div style={{paddingBottom: '48px'}}>
             <h2 style={{textAlign: 'left', paddingBottom:'10px'}}>{title}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
               <img src={imgPath} alt="project" style={{maxWidth: '25vh', height: 'auto', justifyContent: 'left'}}/>
