@@ -24,7 +24,7 @@ export default function Portfolio() {
         <div style={{position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', paddingTop: '10%'}}>
             <h1 style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px', paddingBottom: '5%'}}>Work Experience</h1>
             <Project 
-                title="Lead Graphics Engineer"
+                title="Lead Engineer"
                 description="Created a game engine from the ground up using C++ and OpenGL while acting as the lead engineer for a team of 3.
                 Greatly improved my understanding of graphics programming and optimizing for hardware."
                 imgPath="Start_Your_Engine_Logo.jpeg"
