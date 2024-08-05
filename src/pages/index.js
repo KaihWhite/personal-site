@@ -98,9 +98,9 @@ function About() {
       <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center'}}>
         <motion.div style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px' }}>Who am I?</motion.div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-start', padding: '5%'}}>
-        <img style={{maxWidth: '300px', marginRight: '20px', height: 'auto', objectFit: 'contain', transform: 'rotate(0deg)', float: 'left'}} src="/me.PNG" alt="Picture of me" />
-        <p style={{fontSize: '22px', marginTop: '5%'}}>
+      <div style={{ display: 'flex', flexDirection: 'column', padding: '5%', justifyContent: 'center', alignItems: 'center'}}>
+        <img style={{maxWidth: '300px', height: 'auto', transform: 'rotate(0deg)'}} src="/me.PNG" alt="Picture of me" />
+        <p style={{fontSize: '22px', marginTop: '20px', maxWidth: '1000px'}}>
           I am a tinkerer who grew up on systems that were before my time and got to see the information revolution unfold before my eyes. Every system has always been a magical black box waiting to have its contents emptied.
           It all started with modifying game code to find exploits and dissesemlbing electric skateboards to replace components for friends. I didn't realize it, but I was practicing my ability to understand systems and reverse engineer them.
           My fascination with systems and solutions only grows with every opportunity I have to work on complex topics and diverse problems.
