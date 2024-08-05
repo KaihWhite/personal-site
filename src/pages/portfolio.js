@@ -8,11 +8,11 @@ function Project({ title, description, imgPath, link }) {
 
     return (
         <div style={{paddingBottom: '4%'}}>
-            <h2 style={{textAlign: 'left'}}>{title}</h2>
+            <h2 style={{textAlign: 'left', paddingBottom:'10px'}}>{title}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
               <img src={imgPath} alt="project" style={{maxWidth: '25vh', height: 'auto', justifyContent: 'left'}}/>
               <div style={{maxWidth: '1000px', height: 'auto', paddingTop: '1%'}}>
-                <p style={{}}>{description}</p>
+                <p style={{fontSize: '20px'}}>{description}</p>
               </div>
             </div>
         </div>
@@ -21,7 +21,7 @@ function Project({ title, description, imgPath, link }) {
 
 export default function Portfolio() {
     return (
-        <div style={{position: 'relative', display: 'flex', flexDirection: 'column', paddingTop: '5%', alignItems: 'center'}}>
+        <div style={{position: 'relative', display: 'flex', flexDirection: 'column', paddingTop: '10%', alignItems: 'center', padding: '5%'}}>
           <div style={{maxWidth: '1000px'}}>
             <h1 style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px', paddingBottom: '2%', textAlign: 'center'}}>Work Experience</h1>
             <Project 
