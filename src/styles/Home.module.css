@@ -11,13 +11,13 @@
 
 .intro {
   color: white;
-  font-size: 2rem;
   text-align: center;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   position: relative; 
+  height: 100vh;
 }
 
 .cubeContainer {

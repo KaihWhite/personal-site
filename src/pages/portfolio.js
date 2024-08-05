@@ -7,11 +7,11 @@ function Project({ title, description, imgPath, link }) {
   }
 
     return (
-        <div style={{paddingBottom: '2%'}}>
-            <h2 style={{justifyContent: 'center', alignItems: 'center'}}>{title}</h2>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
-              <img src={imgPath} alt="project" style={{maxWidth: '50vh', height: 'auto'}}/>
-              <div style={{paddingLeft: '2%', width: '300px', height: '200px', paddingTop: '5%'}}>
+        <div style={{paddingBottom: '4%'}}>
+            <h2 style={{textAlign: 'left'}}>{title}</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
+              <img src={imgPath} alt="project" style={{maxWidth: '25vh', height: 'auto', justifyContent: 'left'}}/>
+              <div style={{maxWidth: '1000px', height: 'auto', paddingTop: '1%'}}>
                 <p style={{}}>{description}</p>
               </div>
             </div>
@@ -21,8 +21,9 @@ function Project({ title, description, imgPath, link }) {
 
 export default function Portfolio() {
     return (
-        <div style={{position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', paddingTop: '10%'}}>
-            <h1 style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px', paddingBottom: '5%'}}>Work Experience</h1>
+        <div style={{position: 'relative', display: 'flex', flexDirection: 'column', paddingTop: '5%', alignItems: 'center'}}>
+          <div style={{maxWidth: '1000px'}}>
+            <h1 style={{ fontSize: '48px', fontWeight: 'bold', position: 'relative', top: '0px', paddingBottom: '2%', textAlign: 'center'}}>Work Experience</h1>
             <Project 
                 title="Lead Engineer"
                 description="Created a game engine from the ground up using C++ and OpenGL while acting as the lead engineer for a team of 3.
@@ -43,6 +44,7 @@ export default function Portfolio() {
                 Specifcally, I worked on migrating a legacy AWS feature to a serverless architecture using the AWS CDK and Javascript."
                 imgPath="AWS_logo.png"
                 link="https://www.google.com" />
+          </div>
         </div>
     );
 
