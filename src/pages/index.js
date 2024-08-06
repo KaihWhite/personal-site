@@ -8,6 +8,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 
 import Menu from '../components/Menu';
+import Footer from '../components/Footer';
 import WorkExperience from './work_experience';
 
 
@@ -64,16 +65,6 @@ function Box() {
       <boxBufferGeometry geometry='geometry' args={[3.5, 3.5, 3.5]}/>
       <meshStandardMaterial wireframe color="white"/>
     </m3.mesh>
-  );
-}
-
-
-// Component to create a link with an icon
-function IconLink({ href, iconPath, margin}) {
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', margin: margin || '20px'}}>
-      <img src={iconPath} alt="icon" style={{ width: '30px', height: '30px' }} />
-    </a>
   );
 }
 
@@ -137,10 +128,7 @@ export default function Home() {
 
       <WorkExperience />
 
-      <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: '2', flexDirection: 'row', paddingBottom: '10px'}}>
-        <IconLink href="https://github.com/KaihWhite" iconPath="/github.png" />
-        <IconLink href="https://www.linkedin.com/in/kaihwhite/" iconPath="/linkedin.png" />
-      </div>
+      <Footer />
 
     </div>
   );
