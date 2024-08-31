@@ -28,9 +28,12 @@
   }
   
   .menuLinks li {
-    margin: 10px 0;
+    margin: 10px 0 0 5px;
     color: #ffffff;
     padding: 0 5px;
+    border-color: #ffffff;
+    border-width: 1px;
+    border-style: solid;
   }
   
   .menuLinks li Link {

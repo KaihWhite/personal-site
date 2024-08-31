@@ -1,4 +1,5 @@
 import React from 'react';
+import Head from 'next/head';
 import Menu from '../components/Menu';
 import Footer from '../components/Footer';
 
@@ -19,6 +20,12 @@ function Project({ description, imgPath, link }) {
 export default function Portfolio() {
     return (
         <div style={{background: 'solid black', minHeight: '100vh'}}>
+            <Head>
+                <title>Kaih's Portfolio</title>
+                <meta name="description" content="Welcome to Kaih's portfolio." />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <link rel="icon" href="/THIS_IS_IT.png" />
+            </Head>
             <Menu />
             <div style={{paddingTop: '64px', width: '100%', alignItems: 'center', position: 'relative'}}>
                 <h1 style={{textAlign: 'center', position: 'relative'}}>Portfolio</h1>
@@ -38,7 +45,7 @@ export default function Portfolio() {
                     link="https://github.com/KaihWhite/Start-Your-Engine" />
                 <Project
                     description="Relevant skills: React, Three.js, Web Development, UI/UX Design"
-                    imgPath="THIS_IS_IT.png"
+                    imgPath="THIS_IS_IT-long.png"
                     link="https://github.com/KaihWhite/personal-site" />
             </div>
             
