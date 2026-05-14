@@ -1,3 +1,11 @@
+import { HamburgerMenu } from '@/components/HamburgerMenu';
+import { PlaceholderLanding } from '@/components/PlaceholderLanding';
+
 export default function HomePage() {
-  return <main>placeholder</main>;
+  return (
+    <>
+      <HamburgerMenu context="game" />
+      <PlaceholderLanding />
+    </>
+  );
 }

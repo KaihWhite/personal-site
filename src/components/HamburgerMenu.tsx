@@ -12,9 +12,9 @@ interface HamburgerMenuProps {
 }
 
 const SECTION_LINKS: Array<{ label: string; href: Route }> = [
-  { label: 'Portfolio', href: '/portfolio' as Route },
-  { label: 'Contact', href: '/contact' as Route },
-  { label: 'About', href: '/about' as Route },
+  { label: 'Portfolio', href: '/portfolio' },
+  { label: 'Contact', href: '/contact' },
+  { label: 'About', href: '/about' },
 ];
 
 export function HamburgerMenu({ context }: HamburgerMenuProps) {
