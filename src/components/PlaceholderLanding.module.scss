@@ -1,0 +1,29 @@
+.landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+.title {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  max-width: 32rem;
+  margin: 0;
+  color: rgba(245, 245, 245, 0.75);
+}
+
+.menuHint {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: rgba(245, 245, 245, 0.6);
+}
