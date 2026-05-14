@@ -141,7 +141,7 @@ Listed so the next agent doesn't think they're missed bugs.
 
 These were resolved during Phase 1 execution. Don't undo the resolutions.
 
-1. **Never pin exact npm versions.** `next: "16.2.6"` (exact) made `npm install` run for hours — npm thrashed on resolution. Caret ranges (`^16.2.6`) install in ~19 seconds. Phase 1 commit `ff875a0` is the working version.
+1. **Never pin exact npm versions.** `next: "16.2.6"` (exact) made `npm install` run for hours — npm thrashed on resolution, likely due to React 19 / Next 16's RC-versus-stable history. Caret ranges (`^16.2.6`) install in ~19 seconds. Phase 1 commit `ff875a0` is the working `package.json`. Note: the Phase 1 plan document at Task 2 Step 1 still shows exact versions — that's a historical artifact; do not "correct" the committed `package.json` back to exact pins. If a future package genuinely requires exact pinning (rare), do it after install succeeds, not before.
 2. **Next 16 removed `next lint`.** Use `eslint .` directly in the lint script. The CLI subcommand prints "Invalid project directory provided, no such directory: …/lint" — that's not a path bug, it's the CLI parser treating "lint" as an argument because the subcommand no longer exists.
 3. **ESLint 9 needs flat config (`eslint.config.mjs`).** `.eslintrc.json` is rejected. `eslint-config-next` v16 exports a flat-config array — see `eslint.config.mjs` (literally `export default next`).
 4. **ESLint 9 plugin scoping is per-config-object.** If you add a custom rule from `@typescript-eslint`, you must also re-declare the plugin in the same config object. The simplest move is to drop custom rules until you actually need one.
@@ -213,10 +213,11 @@ tsconfig.json               strict + moduleResolution: bundler
 ## How the user works (preferences observed)
 
 - Methodical TDD plans with bite-sized tasks. Long plan documents are fine; the user reads them carefully.
-- "Skip the approval steps" — when the user says to write or execute, do it; don't ask section-by-section approval.
-- "Work without stopping for clarifying questions; make the reasonable call and continue." When forced to choose, document the call in the plan / commit message and move on. The user redirects if needed.
-- Branch strategy: phases live on `rebuild`, merge to `main` only after a working prototype. Don't land game work on `main` early.
+- "Skip the approval steps" — when the user says to write or execute, do it; don't ask section-by-section approval. Surface design calls inside the document (decisions sections, commit messages, inline notes) instead of gating on questions. The only approval gate is the execution-mode question at the end of plan writing.
+- "Work without stopping for clarifying questions; make the reasonable call and continue." When forced to choose, document the call in the plan / commit message and move on. The user redirects if needed. **Caveats:** this rule does NOT apply to destructive operations (branch deletion, force-push, dropping uncommitted work — still confirm), nor to genuine scope ambiguity ("is this feature in scope for this phase?" — still ask).
+- Branch strategy: phases live on `rebuild`, merge to `main` only after a working prototype. Don't land game work on `main` early. Don't deploy `rebuild` to Vercel's main hosting either — preview deploys per push are fine; production deploys wait for the cutover (Phase 4).
 - TDD is real: hooks have tests with mocked deps, components have behavior tests via RTL, integration is covered by Playwright. The user accepted this pattern across Phase 1 without pushback — keep it.
+- Don't store project context in Claude memory — keep it in this repo (this file and the phase plans). The user prefers project knowledge to travel with the project, not with the agent.
 
 ---
 
