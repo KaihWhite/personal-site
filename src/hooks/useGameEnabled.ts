@@ -37,11 +37,10 @@ export function useGameEnabled(): GameEnabledState {
   const [preference, setPreferenceState] = useState<GamePreference>(() => readStoredPreference());
 
   useEffect(() => {
-    if (hasNoGameParam() && preference !== 'disabled') {
+    if (hasNoGameParam()) {
       window.localStorage.setItem(GAME_ENABLED_STORAGE_KEY, 'disabled');
-      setPreferenceState('disabled');
     }
-  }, [preference]);
+  }, []);
 
   const setPreference = useCallback((next: GamePreference) => {
     if (next === 'auto') {

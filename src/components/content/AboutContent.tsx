@@ -39,7 +39,7 @@ export function AboutContent() {
           information revolution unfold before my eyes. Every system has always been a magical black
           box waiting to have its contents emptied. It all started with modifying game code to find
           exploits and disassembling electric skateboards to replace components for friends. I
-          didn't realize it, but I was practicing my ability to understand systems and reverse
+          didn&apos;t realize it, but I was practicing my ability to understand systems and reverse
           engineer them. My fascination with systems and solutions only grows with every opportunity
           I have to work on complex topics and diverse problems.
         </p>
