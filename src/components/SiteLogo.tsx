@@ -7,7 +7,7 @@ interface SiteLogoProps {
 
 export function SiteLogo({ hidden = false }: SiteLogoProps) {
   return (
-    <Link href="/" className={hidden ? styles.hidden : styles.logo} aria-label="Back to the world">
+    <Link href="/" className={hidden ? styles.hidden : styles.logo} aria-label="Home">
       KW
     </Link>
   );
