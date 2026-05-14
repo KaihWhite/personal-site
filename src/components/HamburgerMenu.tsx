@@ -1,5 +1,6 @@
 'use client';
 
+import type { Route } from 'next';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import styles from './HamburgerMenu.module.scss';
@@ -10,10 +11,10 @@ interface HamburgerMenuProps {
   context: MenuContext;
 }
 
-const SECTION_LINKS: Array<{ label: string; href: '/portfolio' | '/contact' | '/about' }> = [
-  { label: 'Portfolio', href: '/portfolio' },
-  { label: 'Contact', href: '/contact' },
-  { label: 'About', href: '/about' },
+const SECTION_LINKS: Array<{ label: string; href: Route }> = [
+  { label: 'Portfolio', href: '/portfolio' as Route },
+  { label: 'Contact', href: '/contact' as Route },
+  { label: 'About', href: '/about' as Route },
 ];
 
 export function HamburgerMenu({ context }: HamburgerMenuProps) {

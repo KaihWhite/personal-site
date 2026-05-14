@@ -1,0 +1,54 @@
+.section {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+}
+
+.heading {
+  font-size: 2.5rem;
+  text-align: center;
+  margin: 0 0 2rem;
+}
+
+.lede {
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 0 0 3rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  display: block;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  background: #fff;
+  color: #000;
+  overflow: hidden;
+  transition: transform 120ms ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-4px);
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+.cardBody {
+  padding: 1rem;
+}
+
+.cardDescription {
+  font-size: 1rem;
+  margin: 0;
+  text-align: center;
+}
