@@ -75,6 +75,19 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (wantsJump && body.blocked.down) {
       body.setVelocityY(JUMP_VELOCITY);
     }
+
+    // Animation + facing — only when running the sprite texture (the rectangle fallback has no frames).
+    if (!this.usingSprite) return;
+
+    const grounded = body.blocked.down;
+    const moving = Math.abs(body.velocity.x) > 5;
+    const nextKey = !grounded ? 'player-jump' : (moving ? 'player-walk' : 'player-idle');
+    if (this.anims.currentAnim?.key !== nextKey) {
+      this.anims.play(nextKey, true);
+    }
+
+    if (body.velocity.x > 5) this.setFlipX(false);
+    else if (body.velocity.x < -5) this.setFlipX(true);
   }
 
   override getBounds<O extends Phaser.Geom.Rectangle>(_output?: O): O {
