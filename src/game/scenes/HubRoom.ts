@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import { gameBridge } from '@/game/bridge';
 import { Player } from '@/game/entities/Player';
 import { Doorway } from '@/game/entities/Doorway';
-import { HUB_BG_FRAG } from '@/game/shaders/hub-bg';
+import roomBgGlsl from '@/game/shaders/room-bg.glsl';
+import { HUB_PALETTE } from '@/game/shaders/roomPalettes';
 
 const GROUND_HEIGHT = 64;
 const GROUND_FILL = 0x0a0612;
@@ -21,28 +22,29 @@ export class HubRoom extends Phaser.Scene {
   create(): void {
     const { width, height } = this.scale;
 
-    // Shader background plane — behind everything.
-    const baseShader = new Phaser.Display.BaseShader('hub-bg', HUB_BG_FRAG);
+    const baseShader = new Phaser.Display.BaseShader('room-bg', roomBgGlsl, undefined, {
+      uColorDeep:     { type: '3f', value: HUB_PALETTE.deep },
+      uColorMid:      { type: '3f', value: HUB_PALETTE.mid },
+      uColorAccent:   { type: '3f', value: HUB_PALETTE.accent },
+      uWaveSpeed:     { type: '1f', value: HUB_PALETTE.waveSpeed },
+      uWaveAmplitude: { type: '1f', value: HUB_PALETTE.waveAmplitude },
+      uGrainStrength: { type: '1f', value: HUB_PALETTE.grainStrength },
+    });
     const bg = this.add.shader(baseShader, width / 2, height / 2, width, height);
     bg.setDepth(-100);
 
-    // Ground platform — single rectangle.
     const ground = this.add.rectangle(width / 2, height - GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_FILL);
     this.physics.add.existing(ground, true);
 
-    // Player spawn — middle of the room, just above the ground.
     this.player = new Player(this, width / 2, height - GROUND_HEIGHT);
     this.physics.add.collider(this.player, ground);
 
-    // Doorway — to the right of spawn.
     this.doorway = new Doorway(this, width * 0.75, height - GROUND_HEIGHT, 'portfolio');
 
-    // Camera follows player, but the room fits on one screen so this is mostly cosmetic.
     this.cameras.main.startFollow(this.player, true, 0.2, 0.2);
     this.cameras.main.setBounds(0, 0, width, height);
     this.physics.world.setBounds(0, 0, width, height);
 
-    // Bridge wiring: pause + resume.
     this.offPause = gameBridge.on('react:pause', () => this.handlePause());
     this.offResume = gameBridge.on('react:resume', () => this.handleResume());
 

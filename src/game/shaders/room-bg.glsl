@@ -1,3 +1,8 @@
+// time, resolution: auto-injected by Phaser BaseShader
+// uColorDeep/uColorMid/uColorAccent: 0-1 normalized RGB; set per-room via RoomPalette
+// uWaveSpeed: cycles/sec horizontal wave; uWaveAmplitude: max vertical UV offset
+// uGrainStrength: 0 = no grain, ~0.03 = subtle film noise
+
 precision mediump float;
 
 uniform float time;
