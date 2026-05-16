@@ -16,6 +16,7 @@ export abstract class RoomScene extends Phaser.Scene {
 
   /** Subclasses call this from their own `create()` AFTER `this.physics.world` exists. */
   protected wireBridge(): void {
+    if (this.offPause !== undefined) return; // already wired; no-op on double-call
     if (pauseCoordinator.isPaused()) {
       this.paused = true;
       this.physics.world.pause();
