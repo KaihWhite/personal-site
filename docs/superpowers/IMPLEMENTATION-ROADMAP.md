@@ -37,7 +37,7 @@ After 3b ships and the prototype works end-to-end: Phase 4 cutover (`rebuild` �
 | **1** Scaffold + static site | shipped | [`plans/2026-05-13-phase-1-scaffold-and-static-site.md`](./plans/2026-05-13-phase-1-scaffold-and-static-site.md) | committed to `rebuild`, pushed to origin |
 | **2** GameShell + HubRoom (vertical slice) | shipped | [`plans/2026-05-14-phase-2-gameshell-and-first-room.md`](./plans/2026-05-14-phase-2-gameshell-and-first-room.md) | committed to `rebuild`, pushed to origin |
 | **3** design spec (covers 3a + 3b) | done | [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) | committed to `rebuild`, pushed to origin |
-| **3a** Architecture cleanup | shipped | [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) | committed to `rebuild`, not yet pushed |
+| **3a** Architecture cleanup | shipped | [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) | committed to `rebuild`, pushed to origin |
 | **3b** Room expansion + Player sprite + per-room shaders + ContactOverlay + bundle CI | planned (spec done; plan pending) | [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) | not started |
 | **4** Cutover (`rebuild` → `main`, deploy) | not planned yet | — | — |
 
