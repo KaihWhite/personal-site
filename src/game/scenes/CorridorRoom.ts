@@ -5,14 +5,10 @@ import { Doorway } from '@/game/entities/Doorway';
 import roomBgGlsl from '@/game/shaders/room-bg.glsl';
 import { CORRIDOR_PALETTE } from '@/game/shaders/roomPalettes';
 import { RoomScene } from './RoomScene';
-import { parseCorridorSpawn, type CorridorSpawn, type ContentSceneKey } from './corridorSpawn';
+import { parseCorridorSpawn, type CorridorSpawn, type ContentSceneKey, type CorridorInitData, SCENE_TRANSITION_MS } from './corridorSpawn';
 
 const GROUND_HEIGHT = 64;
 const GROUND_FILL = 0x0a0612;
-
-interface CorridorInitData {
-  spawn: CorridorSpawn;
-}
 
 export class CorridorRoom extends RoomScene {
   private player!: Player;
@@ -78,9 +74,9 @@ export class CorridorRoom extends RoomScene {
 
     if (this.player.isInteractPressed()) {
       if (inHub) {
-        this.scene.transition({ target: 'HubRoom', duration: 250 });
+        this.scene.transition({ target: 'HubRoom', duration: SCENE_TRANSITION_MS });
       } else if (inContent) {
-        this.scene.transition({ target: this.contentTargetKey, duration: 250 });
+        this.scene.transition({ target: this.contentTargetKey, duration: SCENE_TRANSITION_MS });
       }
     }
   }

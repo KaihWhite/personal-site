@@ -6,6 +6,12 @@ export type CorridorSpawn =
 export type SceneKey = 'HubRoom' | 'PortfolioRoom' | 'AboutRoom' | 'ContactRoom' | 'CorridorRoom';
 export type ContentSceneKey = 'PortfolioRoom' | 'AboutRoom' | 'ContactRoom';
 
+export const SCENE_TRANSITION_MS = 250;
+
+export interface CorridorInitData {
+  spawn: CorridorSpawn;
+}
+
 export interface CorridorSpawnInfo {
   spawnSide:        'hub' | 'content';     // which doorway the player spawns next to
   facing:           'left' | 'right';      // which way the player faces on spawn
