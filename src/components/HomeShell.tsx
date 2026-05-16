@@ -5,7 +5,7 @@ import { HamburgerMenu } from '@/components/HamburgerMenu';
 import { OverlayRouter } from '@/components/overlays/OverlayRouter';
 import { PlaceholderLanding } from '@/components/PlaceholderLanding';
 import { GameSkipLink } from '@/components/GameSkipLink';
-import { GameEnabledProvider, useGameEnabledContext } from '@/components/GameEnabledProvider';
+import { useGameEnabledContext } from '@/components/GameEnabledProvider';
 
 const GameShell = dynamic(
   () => import('@/game/GameShell').then((m) => m.GameShell),
@@ -13,14 +13,6 @@ const GameShell = dynamic(
 );
 
 export function HomeShell() {
-  return (
-    <GameEnabledProvider>
-      <HomeShellInner />
-    </GameEnabledProvider>
-  );
-}
-
-function HomeShellInner() {
   const { enabled, mounted } = useGameEnabledContext();
 
   if (mounted && enabled) {
