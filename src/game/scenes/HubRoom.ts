@@ -50,6 +50,7 @@ export class HubRoom extends Phaser.Scene {
     this.events.once('destroy', () => this.detachBridge());
 
     gameBridge.emit('game:ready', undefined);
+    gameBridge.emit('game:scene-changed', { room: 'HubRoom' });
   }
 
   override update(): void {

@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { gameBridge } from '@/game/bridge';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -7,11 +6,11 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    // Phase 2: no external assets — Player generates its own texture on first use.
+    // No external assets in Phase 3a — Player generates its own texture on first use.
+    // (Phase 3b adds sprite preload here.)
   }
 
   create(): void {
     this.scene.start('HubRoom');
-    gameBridge.emit('game:scene-changed', { room: 'HubRoom' });
   }
 }
