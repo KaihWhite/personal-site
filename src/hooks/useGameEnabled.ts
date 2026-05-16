@@ -12,7 +12,8 @@ export type GameEnabledReason =
   | 'mobile'
   | 'reduced-motion'
   | 'url-param'
-  | 'explicit-preference';
+  | 'explicit-preference'
+  | 'no-webgl';
 
 export interface GameEnabledState {
   enabled: boolean;
@@ -31,10 +32,27 @@ function hasNoGameParam(): boolean {
   return new URLSearchParams(window.location.search).has('nogame');
 }
 
+function probeWebGL(): boolean {
+  if (typeof document === 'undefined') return true; // SSR: assume true to match Phase 2 behavior
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
+    return ctx !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function useGameEnabled(): GameEnabledState {
   const isMobile = useIsMobile();
   const reducedMotion = usePrefersReducedMotion();
   const [preference, setPreferenceState] = useState<GamePreference>(() => readStoredPreference());
+  const [webglAvailable, setWebglAvailable] = useState(true); // assume true SSR-side; probe client-side
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only WebGL probe; harmless if false-positive on first paint (Provider's `mounted` gate prevents flash)
+    setWebglAvailable(probeWebGL());
+  }, []);
 
   useEffect(() => {
     if (hasNoGameParam()) {
@@ -65,6 +83,9 @@ export function useGameEnabled(): GameEnabledState {
   }
   if (reducedMotion) {
     return { enabled: false, reason: 'reduced-motion', setPreference };
+  }
+  if (!webglAvailable) {
+    return { enabled: false, reason: 'no-webgl', setPreference };
   }
   return { enabled: true, reason: 'auto', setPreference };
 }
