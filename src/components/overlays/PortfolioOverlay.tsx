@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { gameBridge } from '@/game/bridge';
 import { PortfolioContent } from '@/components/content/PortfolioContent';
 import styles from './PortfolioOverlay.module.scss';
 
@@ -18,19 +17,11 @@ export function PortfolioOverlay({ onClose }: PortfolioOverlayProps) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        gameBridge.emit('react:resume', undefined);
-        onClose();
-      }
+      if (event.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
-
-  const handleClose = () => {
-    gameBridge.emit('react:resume', undefined);
-    onClose();
-  };
 
   return (
     <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="Portfolio">
@@ -39,7 +30,7 @@ export function PortfolioOverlay({ onClose }: PortfolioOverlayProps) {
         type="button"
         className={styles.close}
         aria-label="Close portfolio overlay"
-        onClick={handleClose}
+        onClick={onClose}
       >
         Close ✕
       </button>
