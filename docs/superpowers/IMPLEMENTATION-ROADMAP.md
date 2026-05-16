@@ -53,8 +53,8 @@ To verify the current state of the rebuild:
 git checkout rebuild
 npm install         # if node_modules is stale
 npm run build       # 4 static routes; no errors
-npm run test        # 19 vitest cases
-npm run e2e         # 6 playwright cases
+npm run test        # 34 vitest cases
+npm run e2e         # 10 playwright cases
 ```
 
 ---
@@ -85,7 +85,7 @@ Vertical slice of the game:
 - **`<GameShell>`** — client component, ref-guarded mount (StrictMode-safe), dynamic-imported on `/`, skeleton overlay that fades on `game:ready`.
 - **`<PortfolioOverlay>`** — wraps the existing `<PortfolioContent>` with a close button + Escape handler + `react:resume` emission.
 - **`<OverlayRouter>`** — listens to `game:request-overlay`, mounts the right overlay, emits `react:pause`.
-- **`<HomeShell>`** — client component that branches on `useGameEnabled().enabled` between `<GameShell>` and `<PlaceholderLanding>`. `src/app/page.tsx` becomes a one-liner that renders this.
+- **`<HomeShell>`** — client component that defers the game-branch render until client mount (avoids SSR-vs-client hydration mismatch — see Pitfall #18), then branches on `useGameEnabled().enabled` between `<GameShell>` and `<PlaceholderLanding>`. `src/app/page.tsx` is a one-liner that renders this.
 - **Accessibility** — `<GameSkipLink>` (visually-hidden first focusable element on `/` that disables the game), "Disable game" / "Enable game" toggle in the hamburger menu.
 - **E2E** — Playwright scene smoke: canvas mounts, walk-to-doorway opens overlay, Escape closes, `?nogame` falls back to static.
 
@@ -204,7 +204,7 @@ src/
     useGameEnabled.ts       auto-opt-out resolver — read this before touching the game-vs-static branch
     useGameEvents.ts        bridge subscription helper (Phase 2)
     __tests__/              all hooks have tests
-  game/                     ALL Phaser code (Phase 2 onward — does not exist yet)
+  game/                     ALL Phaser code (Phase 2 onward)
     bridge.ts               typed event emitter
     config.ts               Phaser game config factory
     GameShell.tsx           client component owning the Phaser lifecycle
