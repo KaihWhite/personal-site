@@ -5,7 +5,7 @@ import { Doorway } from '@/game/entities/Doorway';
 import roomBgGlsl from '@/game/shaders/room-bg.glsl';
 import { CORRIDOR_PALETTE } from '@/game/shaders/roomPalettes';
 import { RoomScene } from './RoomScene';
-import { parseCorridorSpawn, type CorridorSpawn, type ContentSceneKey, type CorridorInitData, SCENE_TRANSITION_MS } from './corridorSpawn';
+import { parseCorridorSpawn, type ContentSceneKey, type CorridorInitData, SCENE_TRANSITION_MS } from './corridorSpawn';
 
 const GROUND_HEIGHT = 64;
 const GROUND_FILL = 0x0a0612;
