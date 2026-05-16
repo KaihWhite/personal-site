@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 
 test.describe('static site smoke', () => {
   test('home shows placeholder landing and the menu opens', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/?nogame');
     await expect(page.getByRole('heading', { name: /hello there/i })).toBeVisible();
     await page.getByRole('button', { name: /open menu/i }).click();
-    await expect(page.getByRole('link', { name: /portfolio/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Portfolio' })).toBeVisible();
     await expect(page.getByRole('link', { name: /back to the world/i })).not.toBeVisible();
   });
 
@@ -34,14 +34,14 @@ test.describe('static site smoke', () => {
     await page.getByRole('button', { name: /open menu/i }).click();
     await page.getByRole('link', { name: /back to the world/i }).click();
     await expect(page).toHaveURL('/');
-    await expect(page.getByRole('heading', { name: /hello there/i })).toBeVisible();
+    await expect(page.locator('canvas')).toBeVisible({ timeout: 8000 });
   });
 
   test('Escape closes the menu', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/?nogame');
     await page.getByRole('button', { name: /open menu/i }).click();
-    await expect(page.getByRole('link', { name: /portfolio/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Portfolio' })).toBeVisible();
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('link', { name: /portfolio/i })).not.toBeVisible();
+    await expect(page.getByRole('link', { name: 'Portfolio' })).not.toBeVisible();
   });
 });
