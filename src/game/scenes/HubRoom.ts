@@ -39,7 +39,10 @@ export class HubRoom extends Phaser.Scene {
     this.player = new Player(this, width / 2, height - GROUND_HEIGHT);
     this.physics.add.collider(this.player, ground);
 
-    this.doorway = new Doorway(this, width * 0.75, height - GROUND_HEIGHT, 'portfolio');
+    this.doorway = new Doorway(this, width * 0.75, height - GROUND_HEIGHT, {
+      id: 'hub-portfolio',
+      label: '↑ enter portfolio',
+    });
 
     this.cameras.main.startFollow(this.player, true, 0.2, 0.2);
     this.cameras.main.setBounds(0, 0, width, height);
@@ -62,7 +65,7 @@ export class HubRoom extends Phaser.Scene {
     const inside = Phaser.Geom.Rectangle.Overlaps(playerBounds, this.doorway.getBounds());
     this.doorway.setPlayerInside(inside);
     if (inside && this.player.isInteractPressed()) {
-      this.doorway.fireOverlayRequest();
+      gameBridge.emit('game:request-overlay', { section: 'portfolio' });
     }
   }
 
