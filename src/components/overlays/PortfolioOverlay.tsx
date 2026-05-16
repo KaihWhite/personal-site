@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { motion } from 'motion/react';
 import { PortfolioContent } from '@/components/content/PortfolioContent';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import styles from './PortfolioOverlay.module.scss';
 
 interface PortfolioOverlayProps {
@@ -9,7 +11,10 @@ interface PortfolioOverlayProps {
 }
 
 export function PortfolioOverlay({ onClose }: PortfolioOverlayProps) {
+  const backdropRef = useRef<HTMLDivElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
+
+  useFocusTrap(backdropRef);
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -24,7 +29,17 @@ export function PortfolioOverlay({ onClose }: PortfolioOverlayProps) {
   }, [onClose]);
 
   return (
-    <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="Portfolio">
+    <motion.div
+      ref={backdropRef}
+      className={styles.backdrop}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Portfolio"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18, ease: 'easeOut' }}
+    >
       <button
         ref={closeRef}
         type="button"
@@ -34,9 +49,15 @@ export function PortfolioOverlay({ onClose }: PortfolioOverlayProps) {
       >
         Close ✕
       </button>
-      <div className={styles.dialog}>
+      <motion.div
+        className={styles.dialog}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 8 }}
+        transition={{ duration: 0.18, ease: 'easeOut' }}
+      >
         <PortfolioContent />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
