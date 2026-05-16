@@ -2,30 +2,41 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('@/hooks/useGameEnabled', () => ({
-  useGameEnabled: vi.fn(() => ({
+vi.mock('@/components/GameEnabledProvider', () => ({
+  useGameEnabledContext: vi.fn(() => ({
     enabled: true,
     reason: 'auto',
     setPreference: vi.fn(),
+    mounted: true,
   })),
 }));
 
-vi.mock('@/game/bridge', () => ({
-  gameBridge: { emit: vi.fn(), on: vi.fn(), clear: vi.fn() },
+vi.mock('@/game/pauseCoordinator', () => ({
+  pauseCoordinator: {
+    requestPause: vi.fn(),
+    releasePause: vi.fn(),
+    isPaused: vi.fn(() => false),
+    activeReasons: vi.fn(() => new Set()),
+    clear: vi.fn(),
+  },
 }));
 
-import { useGameEnabled } from '@/hooks/useGameEnabled';
+import { useGameEnabledContext } from '@/components/GameEnabledProvider';
+import { pauseCoordinator } from '@/game/pauseCoordinator';
 import { HamburgerMenu } from '../HamburgerMenu';
 
-const mockedUseGameEnabled = vi.mocked(useGameEnabled);
+const mockedUseCtx = vi.mocked(useGameEnabledContext);
 
 describe('HamburgerMenu', () => {
   beforeEach(() => {
-    mockedUseGameEnabled.mockReturnValue({
+    mockedUseCtx.mockReturnValue({
       enabled: true,
       reason: 'auto',
       setPreference: vi.fn(),
+      mounted: true,
     });
+    vi.mocked(pauseCoordinator.requestPause).mockClear();
+    vi.mocked(pauseCoordinator.releasePause).mockClear();
   });
 
   it('is closed by default', () => {
@@ -72,5 +83,33 @@ describe('HamburgerMenu', () => {
     render(<HamburgerMenu context="game" />);
     await user.click(screen.getByRole('button', { name: /open menu/i }));
     expect(screen.getByRole('button', { name: /disable game/i })).toBeInTheDocument();
+  });
+
+  it('calls pauseCoordinator.requestPause("menu") when the menu opens (game context)', async () => {
+    const user = userEvent.setup();
+    render(<HamburgerMenu context="game" />);
+    await user.click(screen.getByRole('button', { name: /open menu/i }));
+    expect(pauseCoordinator.requestPause).toHaveBeenCalledWith('menu');
+  });
+
+  it('calls pauseCoordinator.releasePause("menu") when the menu closes (game context)', async () => {
+    const user = userEvent.setup();
+    render(<HamburgerMenu context="game" />);
+    await user.click(screen.getByRole('button', { name: /open menu/i }));
+    await user.click(screen.getByRole('button', { name: /close menu/i }));
+    expect(pauseCoordinator.releasePause).toHaveBeenCalledWith('menu');
+  });
+
+  it('does NOT call pauseCoordinator on first mount (didMountRef guard)', () => {
+    render(<HamburgerMenu context="game" />);
+    expect(pauseCoordinator.requestPause).not.toHaveBeenCalled();
+    expect(pauseCoordinator.releasePause).not.toHaveBeenCalled();
+  });
+
+  it('does NOT call pauseCoordinator when context is "static"', async () => {
+    const user = userEvent.setup();
+    render(<HamburgerMenu context="static" />);
+    await user.click(screen.getByRole('button', { name: /open menu/i }));
+    expect(pauseCoordinator.requestPause).not.toHaveBeenCalled();
   });
 });

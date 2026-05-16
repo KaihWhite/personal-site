@@ -2,9 +2,9 @@
 
 import type { Route } from 'next';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { gameBridge } from '@/game/bridge';
-import { useGameEnabled } from '@/hooks/useGameEnabled';
+import { useEffect, useRef, useState } from 'react';
+import { useGameEnabledContext } from '@/components/GameEnabledProvider';
+import { pauseCoordinator } from '@/game/pauseCoordinator';
 import styles from './HamburgerMenu.module.scss';
 
 export type MenuContext = 'game' | 'static';
@@ -21,7 +21,8 @@ const SECTION_LINKS: Array<{ label: string; href: Route }> = [
 
 export function HamburgerMenu({ context }: HamburgerMenuProps) {
   const [open, setOpen] = useState(false);
-  const { enabled, setPreference } = useGameEnabled();
+  const { enabled, setPreference } = useGameEnabledContext();
+  const didMountRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
@@ -34,9 +35,15 @@ export function HamburgerMenu({ context }: HamburgerMenuProps) {
 
   // Spec §6.2: opening the menu pauses the game, closing resumes it.
   // Only relevant on `/` (context === 'game' and the game canvas is mounted).
+  // Skip the first effect run so we don't fire a spurious releasePause on mount.
   useEffect(() => {
     if (context !== 'game' || !enabled) return;
-    gameBridge.emit(open ? 'react:pause' : 'react:resume', undefined);
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (open) pauseCoordinator.requestPause('menu');
+    else pauseCoordinator.releasePause('menu');
   }, [open, context, enabled]);
 
   const handleToggleGame = () => {
