@@ -6,7 +6,9 @@ Personal site of Kaih White. Built with Next.js 16, React 19, TypeScript, and Ph
 
 - **Phase 1** — Static-site foundation, content components, hamburger menu, preference hooks. Ships.
 - **Phase 2** — GameShell + HubRoom vertical slice. Player can spawn, walk, and open the portfolio overlay through a doorway. Auto-opt-out (mobile, prefers-reduced-motion, `?nogame`) falls back to the static landing.
-- **Phase 3** — Remaining rooms (About, Contact, Corridor) + polish (Motion v12 overlay transitions, `.glsl` raw imports, WebGPU primary, sprite art, audio).
+- **Phase 3a** — Architecture cleanup: pauseCoordinator (fixes menu+overlay pause desync), GameEnabledProvider context lift, Motion v12 overlay fade+slide, focus trap inside overlays, getBounds caching, BootScene scene-changed timing, GameShell skeleton a11y. Plan written; not yet executed.
+- **Phase 3b** — Room expansion (HubRoom rebuilt + Portfolio + About + Contact + Corridor scenes), Panel entity, ContactOverlay, per-room shaders via `.glsl` raw imports, Player sprite frames, bundle-size CI gate. Spec done; plan pending after 3a ships.
+- **Phase 4** — Cutover (`rebuild` → `main`) + Vercel production deploy.
 
 ## Scripts
 
@@ -21,6 +23,8 @@ Personal site of Kaih White. Built with Next.js 16, React 19, TypeScript, and Ph
 
 ## Design docs
 
-- Spec: `docs/superpowers/specs/2026-05-13-game-portfolio-rebuild-design.md`
+- Spec (Phase 0): `docs/superpowers/specs/2026-05-13-game-portfolio-rebuild-design.md`
 - Phase 1 plan: `docs/superpowers/plans/2026-05-13-phase-1-scaffold-and-static-site.md`
 - Phase 2 plan: `docs/superpowers/plans/2026-05-14-phase-2-gameshell-and-first-room.md`
+- Phase 3 spec: `docs/superpowers/specs/2026-05-16-phase-3-multi-room-and-polish-design.md`
+- Phase 3a plan: `docs/superpowers/plans/2026-05-16-phase-3a-architecture-cleanup.md`

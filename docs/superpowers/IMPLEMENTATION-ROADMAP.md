@@ -14,17 +14,32 @@
 
 ## Where to start (next concrete move)
 
-**Write the Phase 3 plan.** Phase 2 shipped cleanly on `rebuild`. Phase 3 needs a written plan before execution.
+**Execute Plan 3a.** The plan is fully written, pushed to `origin/rebuild`, and self-contained — 15 tasks, ~1879 lines, mirrors Phase 2's plan structure.
 
 ```bash
 # you are here
 git checkout rebuild
-git log --oneline -1   # should be: 11cad77 fix(home): defer game-branch render until client mount...
+git pull origin rebuild
+git log --oneline -1   # should be: 71e35e0 docs(plan): Phase 3a architecture-cleanup plan (15 tasks) (or later)
 ```
 
-Use `/superpowers:writing-plans` against the Phase 3 forward-pointer (bottom of this document) and the spec (§11 step 7). Phase 3 includes: AboutRoom + PortfolioRoom + ContactRoom + CorridorRoom (or HubRoom rename + adjacent rooms — see forward-pointer), ContactOverlay, in-world Panel entity, per-room shaders moved to `.glsl` files via Turbopack raw imports, Motion v12 overlay transitions, WebGPU primary renderer flip, sprite art, bundle-size CI gate, and the polish items added to the "Deferred" section during Phase 2 execution (see below).
+**Authoritative artifacts** for Phase 3 work:
+- Phase 3 design spec: [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) — covers the entire Phase 3 vision; both 3a and 3b implement against it.
+- Plan 3a (cleanup): [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) — the next thing to execute.
 
-After Phase 3 ships, cutover (`rebuild` → `main`) + production deploy (Phase 4).
+**Launch** (the user picks the mode at session start; don't auto-pick):
+
+```bash
+/superpowers:subagent-driven-development docs/superpowers/plans/2026-05-16-phase-3a-architecture-cleanup.md
+# OR
+/superpowers:executing-plans docs/superpowers/plans/2026-05-16-phase-3a-architecture-cleanup.md
+```
+
+Phase 2 used subagent-driven and shipped all 18 tasks cleanly; subagent-driven remains the recommendation for plans of this size, but Plan 3a is small enough that inline execution is also viable.
+
+After 3a ships: write **Plan 3b** (room expansion + Player sprite + per-room shaders + ContactOverlay + bundle-size CI gate). Plan 3b is unwritten; its spec sections live in the Phase 3 spec (§4, §6, §7, §8, §10). Use `/superpowers:writing-plans` against those sections.
+
+After 3b ships and the prototype works end-to-end: Phase 4 cutover (`rebuild` → `main`, Vercel production deploy).
 
 ---
 
@@ -35,7 +50,9 @@ After Phase 3 ships, cutover (`rebuild` → `main`) + production deploy (Phase 4
 | **0** Brainstorm + spec | done | [`specs/2026-05-13-game-portfolio-rebuild-design.md`](./specs/2026-05-13-game-portfolio-rebuild-design.md) | committed to `main` |
 | **1** Scaffold + static site | shipped | [`plans/2026-05-13-phase-1-scaffold-and-static-site.md`](./plans/2026-05-13-phase-1-scaffold-and-static-site.md) | committed to `rebuild`, pushed to origin |
 | **2** GameShell + HubRoom (vertical slice) | shipped | [`plans/2026-05-14-phase-2-gameshell-and-first-room.md`](./plans/2026-05-14-phase-2-gameshell-and-first-room.md) | committed to `rebuild`, pushed to origin |
-| **3** Remaining rooms + polish | not planned yet | — | — |
+| **3** design spec (covers 3a + 3b) | done | [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) | committed to `rebuild`, pushed to origin |
+| **3a** Architecture cleanup | planned, ready to execute | [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) | not started |
+| **3b** Room expansion + Player sprite + per-room shaders + ContactOverlay + bundle CI | not planned yet (spec done) | — | — |
 | **4** Cutover (`rebuild` → `main`, deploy) | not planned yet | — | — |
 
 ---
@@ -172,9 +189,11 @@ These were resolved during Phase 1 execution. Don't undo the resolutions.
 ```
 docs/superpowers/
   IMPLEMENTATION-ROADMAP.md                          ← you are here
-  specs/2026-05-13-game-portfolio-rebuild-design.md  authoritative spec
+  specs/2026-05-13-game-portfolio-rebuild-design.md  authoritative spec (Phase 0)
+  specs/2026-05-16-phase-3-multi-room-and-polish-design.md  Phase 3 design (covers 3a + 3b)
   plans/2026-05-13-phase-1-scaffold-and-static-site.md
   plans/2026-05-14-phase-2-gameshell-and-first-room.md
+  plans/2026-05-16-phase-3a-architecture-cleanup.md  ← next to execute
 
 src/
   app/
@@ -232,21 +251,23 @@ tsconfig.json               strict + moduleResolution: bundler
 
 ---
 
-## Phase 3 forward-pointer (write the plan when Phase 2 ships)
+## Phase 3b forward-pointer (write the plan after Plan 3a ships)
 
-Spec §11 step 7 calls Phase 3 "Remaining rooms" — replicate the HubRoom/Doorway/Overlay pattern across:
+Plan 3a covers the architecture cleanup subsystem (pauseCoordinator, GameEnabledProvider context lift, Motion v12 overlay transitions, focus trap, getBounds cache, BootScene timing, skeleton a11y, first-mount guard). When 3a is shipped and pushed, write **Plan 3b** against the Phase 3 spec sections that 3a doesn't touch:
 
-- **Pause coordinator** — pause-reason ref-counter or shared coordinator to fix the menu-vs-overlay desync (see Deferred). Should land early in Phase 3 because new rooms / overlays will multiply the desync surface area.
-- **AboutRoom** — adds the in-world `Panel` entity (spec §6.5, §8.1). Reads from `src/game/content/panels.ts`. No overlay — content is in-world.
-- **PortfolioRoom** — already has its overlay from Phase 2, but the room itself is currently the Hub. Either rename the Hub to PortfolioRoom or add a real spawn HubRoom and put PortfolioRoom adjacent. Spec §8.1 wants both.
-- **ContactRoom** + **ContactOverlay** — mirror PortfolioOverlay; trivial.
-- **CorridorRoom** — connecting passages with screen-edge transitions (spec §8.1). One scene with multiple spawn points.
-- **Per-room shaders** — `about-bg`, `portfolio-bg`, `contact-bg`. Move to `.glsl` files at this point (configure Turbopack raw-import rule).
-- **Global post-FX pipeline** — vignette / chromatic aberration.
-- **Motion v12 transitions** for overlay open/close.
-- **WebGPU primary** flip with cross-browser QA.
-- **Sprite art** for the player (idle / walk / jump).
-- **Bundle-size CI gate** on `/`.
-- **(Optional)** ambient audio loop, focus trap inside overlays, animated room transitions.
+- **5 Phaser scenes** — HubRoom rebuilt as central spawn with 3 doorways, PortfolioRoom (existing overlay; new return doorway), AboutRoom (with Panels), ContactRoom (with new ContactOverlay), CorridorRoom (shared scene with named spawn points). Spec §4.
+- **Panel entity** — new in-world content reader for AboutRoom; reads on player proximity, no overlay. Spec §7.
+- **ContactOverlay** — mirrors PortfolioOverlay; new test file. Plugs into the OverlayRouter pattern 3a already migrated. Spec §9 minor.
+- **Per-room shader strategy** — one shared `room-bg.glsl` with palette + motion uniforms; `roomPalettes.ts` per-room configs; delete `hub-bg.ts`. Requires `.glsl` raw imports via Turbopack rule in `next.config.mjs`. Spec §6, §9.5.
+- **Player sprite + AnimationManager** — preload `public/sprites/player.png`, register idle/walk/jump anims in BootScene, swap Player to use sprite frames (fall back to rectangle if asset missing). Spec §8.
+- **Bundle-size CI gate** — `scripts/check-bundle-size.mjs` script; `/` < 500KB gzipped, static routes < 100KB each; runs as part of `npm test`. Spec §10.
 
-After Phase 3 ships and the prototype works end-to-end, merge `rebuild` → `main` (Phase 4 / cutover) and update the README.
+**Explicit non-goals** (kicked beyond Phase 3 per the spec):
+- WebGPU renderer flip (stays Phaser.WEBGL; SwiftShader Playwright args preserved).
+- Global post-FX pipeline (vignette / chromatic aberration).
+- Ambient audio loop.
+- Sprite-art sourcing (Plan 3b codes against the contract; user supplies the PNG or accepts the rectangle fallback).
+- Additional sprite states (landing, near-doorway, turn-around).
+- Hosted CI (GitHub Actions) for the bundle gate — local `npm test` only in 3b.
+
+After Plan 3b ships and the prototype works end-to-end, merge `rebuild` → `main` (Phase 4 / cutover) and update the README.
