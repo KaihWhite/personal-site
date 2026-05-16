@@ -14,30 +14,16 @@
 
 ## Where to start (next concrete move)
 
-**Execute Plan 3a.** The plan is fully written, pushed to `origin/rebuild`, and self-contained — 15 tasks, ~1879 lines, mirrors Phase 2's plan structure.
+**Write Plan 3b.** Plan 3a shipped cleanly on `rebuild`. Plan 3b ships the multi-room world.
 
 ```bash
 # you are here
 git checkout rebuild
 git pull origin rebuild
-git log --oneline -1   # should be: 71e35e0 docs(plan): Phase 3a architecture-cleanup plan (15 tasks) (or later)
+git log --oneline -1   # should be: <Phase 3a top SHA>
 ```
 
-**Authoritative artifacts** for Phase 3 work:
-- Phase 3 design spec: [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) — covers the entire Phase 3 vision; both 3a and 3b implement against it.
-- Plan 3a (cleanup): [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) — the next thing to execute.
-
-**Launch** (the user picks the mode at session start; don't auto-pick):
-
-```bash
-/superpowers:subagent-driven-development docs/superpowers/plans/2026-05-16-phase-3a-architecture-cleanup.md
-# OR
-/superpowers:executing-plans docs/superpowers/plans/2026-05-16-phase-3a-architecture-cleanup.md
-```
-
-Phase 2 used subagent-driven and shipped all 18 tasks cleanly; subagent-driven remains the recommendation for plans of this size, but Plan 3a is small enough that inline execution is also viable.
-
-After 3a ships: write **Plan 3b** (room expansion + Player sprite + per-room shaders + ContactOverlay + bundle-size CI gate). Plan 3b is unwritten; its spec sections live in the Phase 3 spec (§4, §6, §7, §8, §10). Use `/superpowers:writing-plans` against those sections.
+Use `/superpowers:writing-plans` against the Phase 3 spec sections that 3a doesn't touch — see the "Phase 3b forward-pointer" section at the bottom of this file.
 
 After 3b ships and the prototype works end-to-end: Phase 4 cutover (`rebuild` → `main`, Vercel production deploy).
 
@@ -51,8 +37,8 @@ After 3b ships and the prototype works end-to-end: Phase 4 cutover (`rebuild` �
 | **1** Scaffold + static site | shipped | [`plans/2026-05-13-phase-1-scaffold-and-static-site.md`](./plans/2026-05-13-phase-1-scaffold-and-static-site.md) | committed to `rebuild`, pushed to origin |
 | **2** GameShell + HubRoom (vertical slice) | shipped | [`plans/2026-05-14-phase-2-gameshell-and-first-room.md`](./plans/2026-05-14-phase-2-gameshell-and-first-room.md) | committed to `rebuild`, pushed to origin |
 | **3** design spec (covers 3a + 3b) | done | [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) | committed to `rebuild`, pushed to origin |
-| **3a** Architecture cleanup | planned, ready to execute | [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) | not started |
-| **3b** Room expansion + Player sprite + per-room shaders + ContactOverlay + bundle CI | not planned yet (spec done) | — | — |
+| **3a** Architecture cleanup | shipped | [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) | committed to `rebuild`, not yet pushed |
+| **3b** Room expansion + Player sprite + per-room shaders + ContactOverlay + bundle CI | planned (spec done; plan pending) | [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) | not started |
 | **4** Cutover (`rebuild` → `main`, deploy) | not planned yet | — | — |
 
 ---
@@ -108,6 +94,24 @@ Vertical slice of the game:
 
 ---
 
+## What Phase 3a shipped
+
+Architecture cleanup landed on top of Phase 2's vertical slice:
+
+- **`pauseCoordinator`** — `src/game/pauseCoordinator.ts`, a reason-set singleton (`'menu' | 'overlay'`) that owns pause state. Emits `react:pause`/`react:resume` only on 0↔1 transitions, so concurrent pause sources don't desync the game. `<HamburgerMenu>` and `<OverlayRouter>` route through it instead of poking the bridge directly. `clear()` runs on `<GameShell>` unmount.
+- **`<GameEnabledProvider>`** — `src/components/GameEnabledProvider.tsx`, a React context that calls `useGameEnabled()` once and exposes `{ enabled, reason, setPreference, mounted }`. Collapses 3 prior listener pairs (HomeShell + HamburgerMenu + GameSkipLink) down to one. The `mounted` flag is the SSR-safe hydration gate (replaces Phase 2's inline `useEffect` in HomeShell). **Provider lives in the root layout** (`src/app/layout.tsx`) so static pages — which render `<HamburgerMenu>` directly — see the context too; otherwise SSR crashes on the static routes after Task 8.
+- **`useFocusTrap`** — `src/hooks/useFocusTrap.ts`, cycles Tab/Shift+Tab within a container ref. Used by `<PortfolioOverlay>`. Escape is owned by the overlay (not the trap).
+- **Motion v12 overlay transitions** — `<PortfolioOverlay>` wraps backdrop+dialog in `<motion.div>` (fade + 8px slide-up, 180ms ease-out). `<OverlayRouter>` wraps the overlay in `<AnimatePresence>` so exit animations play on close.
+- **`getBounds()` rect caching** — `Player` and `Doorway` pre-allocate a `Phaser.Geom.Rectangle` and mutate it via `setTo()` instead of allocating fresh on every frame.
+- **BootScene timing fix** — `BootScene` no longer emits `game:scene-changed`; each scene's own `create()` does. HubRoom emits it after `game:ready`.
+- **GameShell a11y** — skeleton text is conditional (`{ready ? '' : 'loading...'}`) and wrapped in `aria-live="polite"`. `aria-hidden="true"` moved off the container div onto the injected canvas (set after `game:ready` fires). Cleanup also calls `pauseCoordinator.clear()`.
+- **HamburgerMenu first-mount guard** — `didMountRef` skips the pause effect's first run so we don't fire a spurious `releasePause` on mount.
+- **Tests** — 24 new unit cases (pauseCoordinator 9, useFocusTrap 4, GameEnabledProvider 3, OverlayRouter 4, HamburgerMenu +4) and 1 added/1 removed from existing files; total 58/58. E2E unchanged at 10/10.
+
+**Note for next agent:** The root-layout Provider hoist was *not* in the original Plan 3a (the plan wrapped HomeShell with the Provider locally). The unplanned fix is committed as `fix(layout): hoist GameEnabledProvider to root layout` — find it in `git log`. The plan's HomeShell wrapper would have crashed `/about`, `/portfolio`, and `/contact` SSR after Task 8 migrated HamburgerMenu to `useGameEnabledContext`.
+
+---
+
 ## Architectural decisions made along the way
 
 | Decision | Why | Where |
@@ -146,14 +150,7 @@ Listed so the next agent doesn't think they're missed bugs.
 - **`react:reduce-motion` runtime toggle.** Bridge event exists but isn't wired; auto-opt-out at boot covers the common case.
 - **Ambient audio loop.** Spec §12 lists as out-of-scope-for-now; trivial to add later behind a first-input gate.
 - **Site-wide font choice.** Currently system-ui everywhere. Probably fine for the silhouette aesthetic; revisit if it feels generic.
-- **Pause-ownership coordinator.** Today, both `<HamburgerMenu>` and `<OverlayRouter>` emit `react:pause`/`react:resume` independently. Sequence `menu-open → overlay-open → overlay-close` resumes the game while the menu is still visibly open, contradicting spec §6.2. A pause-reason ref-counter (or shared coordinator that tracks the set of active pause sources) would prevent the desync.
-- **Move `react:resume` emit into `OverlayRouter.close`.** Today the overlay component emits `react:resume` in its close handler. If a future code path closes the overlay outside the overlay's own handlers (route change, programmatic close, pause-coordinator above), the game stays paused. The contract belongs in `OverlayRouter.close` so closing the overlay always resumes regardless of trigger.
-- **Cache `Doorway.getBounds()` and `Player.getBounds()` rectangles.** Both allocate a fresh `Phaser.Geom.Rectangle` every frame. Negligible at one doorway + one player; flag for cleanup once Phase 3 adds rooms with multiple interactables.
-- **`<GameShell>` skeleton text accessibility.** "loading…" is rendered inside the shell's `<div className={styles.skeleton}>` which is NOT under the `aria-hidden="true"` canvas container. Screen readers announce it once. Either move it under `aria-hidden` (silent) or wrap in `aria-live="polite"` (announces transitions).
-- **`BootScene` emits `game:scene-changed` for HubRoom before HubRoom is created.** Moving this emit into `HubRoom.create()` (and any future scene's `create()`) would be the correct pattern for Phase 3 room-transition consumers.
-- **`useGameEnabled` is called from 3 components on `/`** (`HomeShell`, `HamburgerMenu`, `GameSkipLink`). Each instantiates its own resize/matchMedia listeners. Lift to a React context when more consumers appear in Phase 3.
 - **Sass `legacy-js-api` deprecation warnings** during unit test runs. Pre-existing Next 16 plumbing; one-line `sass` config tweak would silence. Cosmetic.
-- **First-mount `react:resume` noise.** `<HamburgerMenu>`'s pause effect fires `react:resume` on first mount when `open === false`. Harmless (game isn't paused yet) but adds bridge log noise during boot. A `didMountRef` guard would skip the first emit.
 
 ---
 
