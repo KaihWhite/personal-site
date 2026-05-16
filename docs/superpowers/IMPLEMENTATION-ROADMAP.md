@@ -14,22 +14,17 @@
 
 ## Where to start (next concrete move)
 
-**Execute Phase 2.** The plan is fully written, committed, and self-contained.
+**Write the Phase 3 plan.** Phase 2 shipped cleanly on `rebuild`. Phase 3 needs a written plan before execution.
 
 ```bash
 # you are here
 git checkout rebuild
-git log --oneline -1   # should be: a9ce57c Add Phase 2 implementation plan ...
-
-# launch
-/superpowers:subagent-driven-development docs/superpowers/plans/2026-05-14-phase-2-gameshell-and-first-room.md
-# OR
-/superpowers:executing-plans docs/superpowers/plans/2026-05-14-phase-2-gameshell-and-first-room.md
+git log --oneline -1   # should be: 11cad77 fix(home): defer game-branch render until client mount...
 ```
 
-Phase 2 is 18 tasks. Subagent-driven is recommended because the plan is long and fresh-context-per-task keeps work clean. Inline execution also works.
+Use `/superpowers:writing-plans` against the Phase 3 forward-pointer (bottom of this document) and the spec (§11 step 7). Phase 3 includes: AboutRoom + PortfolioRoom + ContactRoom + CorridorRoom (or HubRoom rename + adjacent rooms — see forward-pointer), ContactOverlay, in-world Panel entity, per-room shaders moved to `.glsl` files via Turbopack raw imports, Motion v12 overlay transitions, WebGPU primary renderer flip, sprite art, bundle-size CI gate, and the polish items added to the "Deferred" section during Phase 2 execution (see below).
 
-After Phase 2 ships, write **Phase 3 plan** (remaining rooms + polish; forward-pointer at the bottom of this document).
+After Phase 3 ships, cutover (`rebuild` → `main`) + production deploy (Phase 4).
 
 ---
 
@@ -39,7 +34,7 @@ After Phase 2 ships, write **Phase 3 plan** (remaining rooms + polish; forward-p
 |---|---|---|---|
 | **0** Brainstorm + spec | done | [`specs/2026-05-13-game-portfolio-rebuild-design.md`](./specs/2026-05-13-game-portfolio-rebuild-design.md) | committed to `main` |
 | **1** Scaffold + static site | shipped | [`plans/2026-05-13-phase-1-scaffold-and-static-site.md`](./plans/2026-05-13-phase-1-scaffold-and-static-site.md) | committed to `rebuild`, pushed to origin |
-| **2** GameShell + HubRoom (vertical slice) | planned, ready to execute | [`plans/2026-05-14-phase-2-gameshell-and-first-room.md`](./plans/2026-05-14-phase-2-gameshell-and-first-room.md) | not started |
+| **2** GameShell + HubRoom (vertical slice) | shipped | [`plans/2026-05-14-phase-2-gameshell-and-first-room.md`](./plans/2026-05-14-phase-2-gameshell-and-first-room.md) | committed to `rebuild`, not yet pushed |
 | **3** Remaining rooms + polish | not planned yet | — | — |
 | **4** Cutover (`rebuild` → `main`, deploy) | not planned yet | — | — |
 
@@ -80,7 +75,7 @@ The full Phase 1 plan ships exact code for all 16 tasks. If something looks unfa
 
 ---
 
-## What Phase 2 will ship
+## What Phase 2 shipped
 
 Vertical slice of the game:
 
@@ -134,6 +129,14 @@ Listed so the next agent doesn't think they're missed bugs.
 - **`react:reduce-motion` runtime toggle.** Bridge event exists but isn't wired; auto-opt-out at boot covers the common case.
 - **Ambient audio loop.** Spec §12 lists as out-of-scope-for-now; trivial to add later behind a first-input gate.
 - **Site-wide font choice.** Currently system-ui everywhere. Probably fine for the silhouette aesthetic; revisit if it feels generic.
+- **Pause-ownership coordinator.** Today, both `<HamburgerMenu>` and `<OverlayRouter>` emit `react:pause`/`react:resume` independently. Sequence `menu-open → overlay-open → overlay-close` resumes the game while the menu is still visibly open, contradicting spec §6.2. A pause-reason ref-counter (or shared coordinator that tracks the set of active pause sources) would prevent the desync.
+- **Move `react:resume` emit into `OverlayRouter.close`.** Today the overlay component emits `react:resume` in its close handler. If a future code path closes the overlay outside the overlay's own handlers (route change, programmatic close, pause-coordinator above), the game stays paused. The contract belongs in `OverlayRouter.close` so closing the overlay always resumes regardless of trigger.
+- **Cache `Doorway.getBounds()` and `Player.getBounds()` rectangles.** Both allocate a fresh `Phaser.Geom.Rectangle` every frame. Negligible at one doorway + one player; flag for cleanup once Phase 3 adds rooms with multiple interactables.
+- **`<GameShell>` skeleton text accessibility.** "loading…" is rendered inside the shell's `<div className={styles.skeleton}>` which is NOT under the `aria-hidden="true"` canvas container. Screen readers announce it once. Either move it under `aria-hidden` (silent) or wrap in `aria-live="polite"` (announces transitions).
+- **`BootScene` emits `game:scene-changed` for HubRoom before HubRoom is created.** Moving this emit into `HubRoom.create()` (and any future scene's `create()`) would be the correct pattern for Phase 3 room-transition consumers.
+- **`useGameEnabled` is called from 3 components on `/`** (`HomeShell`, `HamburgerMenu`, `GameSkipLink`). Each instantiates its own resize/matchMedia listeners. Lift to a React context when more consumers appear in Phase 3.
+- **Sass `legacy-js-api` deprecation warnings** during unit test runs. Pre-existing Next 16 plumbing; one-line `sass` config tweak would silence. Cosmetic.
+- **First-mount `react:resume` noise.** `<HamburgerMenu>`'s pause effect fires `react:resume` on first mount when `open === false`. Harmless (game isn't paused yet) but adds bridge log noise during boot. A `didMountRef` guard would skip the first emit.
 
 ---
 
@@ -153,6 +156,14 @@ These were resolved during Phase 1 execution. Don't undo the resolutions.
 10. **React 19 lints cascading-render setState in effects.** `useGameEnabled` originally set state in an effect when `?nogame` was present; the lint rule fired. Resolution: the URL-param branch already short-circuits at render time, so the effect only writes to localStorage. No state set.
 11. **React 19 StrictMode double-invokes effects.** `<GameShell>` mount must be ref-guarded (`mountedRef.current`) or you get two Phaser instances in dev. The Phase 2 plan handles this in Task 9.
 12. **Playwright + reduced-motion.** Some Playwright defaults emulate reduced-motion, which trips the auto-opt-out and hides the canvas. Phase 2 sets `reducedMotion: 'no-preference'` and a fixed `viewport: { width: 1280, height: 800 }` in `playwright.config.ts` (Task 15 Step 1).
+13. **Phaser ships v4 on `latest` but the plan targets v3.90.** `npm install --save phaser` resolved to `phaser@4.x` during Task 1. v4 has breaking changes that invalidate the plan's `Phaser.GameObjects.Shader`, `Phaser.Display.BaseShader`, `Phaser.Input.Keyboard.KeyCodes`, and Arcade physics API usage. Pin to `^3.90.0` (caret range, not exact) explicitly via `npm install --save phaser@^3.90.0`. Updating to v4 is a deliberate Phase 3+ migration with cross-API rewrites.
+14. **Phase 1 GLSL template included an unused `varying`.** The original `src/game/shaders/hub-bg.ts` declared `varying vec2 fragCoord;` but the fragment shader read `gl_FragCoord.xy` directly. Removed during Phase 2; future shaders should also drop the `varying` unless paired with a custom vertex shader.
+15. **`Phaser.GameObjects.Container.getBounds()` is generic over the output rect type.** Overriding with a plain return type triggers TS strict's `noImplicitOverride` AND a generic-mismatch error. Add `override` keyword and an ignored `_output?: Phaser.Geom.Rectangle` parameter. Already applied in `Doorway.getBounds()`.
+16. **Playwright headless Chromium needs SwiftShader launch args for WebGL.** Without them, `Phaser.WEBGL` fails to initialize and you get a blank canvas. Add `launchOptions.args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']` to the Chromium project in `playwright.config.ts`. Already applied. Switching the runtime to `Phaser.AUTO` instead would defeat the shader visual on test environments — keep `Phaser.WEBGL` and configure Playwright.
+17. **Phaser's `JustDown()` can't observe `keyboard.press()`.** `page.keyboard.press('ArrowUp')` sends keydown+keyup atomically; Phaser sets the `_justDown` flag and immediately clears it on the keyup before any game frame can read it. Use `keyboard.down('ArrowUp')` + brief `waitForTimeout(100)` + `keyboard.up('ArrowUp')` for interact-style inputs in Playwright tests.
+18. **React 19 hydration mismatch in `<HomeShell>` if `useGameEnabled` disagrees between server and client.** `useGameEnabled` returns `{ enabled: true }` on SSR (no `window`) and may return `{ enabled: false }` on client (URL `?nogame`, mobile viewport, `prefers-reduced-motion: reduce`, stored "disabled" preference). React 19 logs a hydration error and the user sees a brief flash. Resolution applied in commit `11cad77`: gate `<HomeShell>` behind a `mounted` `useState(false)` set in `useEffect` — render `<PlaceholderLanding>` during SSR and first paint, swap to the game branch after mount.
+19. **`eslint-config-next` flags the `mounted = useState(false); useEffect(() => setMounted(true), [])` pattern via `react-hooks/set-state-in-effect`.** This is the canonical client-only-render pattern; targeted inline suppression (`// eslint-disable-line react-hooks/set-state-in-effect`) is correct. Applied in `<HomeShell>`.
+20. **Phaser 3.90's `physics.add.existing(ground, true)` second-arg `true` means "static body".** Omitting it gives the ground a dynamic body that falls under gravity. The `true` is load-bearing; don't strip it as cleanup.
 
 ---
 
@@ -225,6 +236,7 @@ tsconfig.json               strict + moduleResolution: bundler
 
 Spec §11 step 7 calls Phase 3 "Remaining rooms" — replicate the HubRoom/Doorway/Overlay pattern across:
 
+- **Pause coordinator** — pause-reason ref-counter or shared coordinator to fix the menu-vs-overlay desync (see Deferred). Should land early in Phase 3 because new rooms / overlays will multiply the desync surface area.
 - **AboutRoom** — adds the in-world `Panel` entity (spec §6.5, §8.1). Reads from `src/game/content/panels.ts`. No overlay — content is in-world.
 - **PortfolioRoom** — already has its overlay from Phase 2, but the room itself is currently the Hub. Either rename the Hub to PortfolioRoom or add a real spawn HubRoom and put PortfolioRoom adjacent. Spec §8.1 wants both.
 - **ContactRoom** + **ContactOverlay** — mirror PortfolioOverlay; trivial.
