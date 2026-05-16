@@ -7,7 +7,7 @@ export class BootScene extends Phaser.Scene {
 
   preload(): void {
     // Spritesheet is user-supplied. If the file is absent, Phaser logs a load error
-    // but the game continues — Player.ensureTexture() falls back to a generated
+    // but the game continues — Player.ensureFallbackTexture() falls back to a generated
     // rectangle texture (Phase 2 path). See spec §8.3.
     this.load.spritesheet('player', '/sprites/player.png', { frameWidth: 32, frameHeight: 56 });
   }

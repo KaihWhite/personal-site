@@ -5,6 +5,8 @@ const JUMP_VELOCITY = -550;
 const WIDTH = 32;
 const HEIGHT = 56;
 const FILL_COLOR = 0xf5f5f5;
+const SPRITE_KEY = 'player';
+const FALLBACK_KEY = 'player-silhouette';
 
 export interface PlayerKeys {
   left: Phaser.Input.Keyboard.Key;
@@ -20,10 +22,13 @@ export interface PlayerKeys {
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private keys: PlayerKeys;
   private readonly bounds: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle();
+  private readonly usingSprite: boolean;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    const tex = Player.ensureTexture(scene);
+    const usingSprite = scene.textures.exists(SPRITE_KEY);
+    const tex = usingSprite ? SPRITE_KEY : Player.ensureFallbackTexture(scene);
     super(scene, x, y, tex);
+    this.usingSprite = usingSprite;
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.setOrigin(0.5, 1);
@@ -87,14 +92,23 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     return this.bounds as unknown as O;
   }
 
-  private static ensureTexture(scene: Phaser.Scene): string {
-    const key = 'player-silhouette';
-    if (scene.textures.exists(key)) return key;
+  /** Whether this Player instance is rendering with the sprite (vs the rectangle fallback). */
+  isSpriteMode(): boolean {
+    return this.usingSprite;
+  }
+
+  /** Optional caller-supplied facing seed (used by scenes that spawn the player from a transition). */
+  setFacing(direction: 'left' | 'right'): void {
+    this.setFlipX(direction === 'left');
+  }
+
+  private static ensureFallbackTexture(scene: Phaser.Scene): string {
+    if (scene.textures.exists(FALLBACK_KEY)) return FALLBACK_KEY;
     const g = scene.add.graphics({ x: 0, y: 0 });
     g.fillStyle(FILL_COLOR, 1);
     g.fillRect(0, 0, WIDTH, HEIGHT);
-    g.generateTexture(key, WIDTH, HEIGHT);
+    g.generateTexture(FALLBACK_KEY, WIDTH, HEIGHT);
     g.destroy();
-    return key;
+    return FALLBACK_KEY;
   }
 }
