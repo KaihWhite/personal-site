@@ -1,11 +1,12 @@
 # kaihwhite.com
 
-Personal site of Kaih White. Built with Next.js 16, React 19, and TypeScript.
+Personal site of Kaih White. Built with Next.js 16, React 19, TypeScript, and Phaser 3.90+.
 
-In Phase 2 this site becomes an in-medias-res 2D sidescroller exploration game (Phaser 3.90+).
-Phase 1 (this branch) ships the modernized static-site foundation: the four content routes
-(`/`, `/portfolio`, `/contact`, `/about`), the hamburger menu, and the preference hooks that
-the game will plug into.
+## Status
+
+- **Phase 1** — Static-site foundation, content components, hamburger menu, preference hooks. Ships.
+- **Phase 2** — GameShell + HubRoom vertical slice. Player can spawn, walk, and open the portfolio overlay through a doorway. Auto-opt-out (mobile, prefers-reduced-motion, `?nogame`) falls back to the static landing.
+- **Phase 3** — Remaining rooms (About, Contact, Corridor) + polish (Motion v12 overlay transitions, `.glsl` raw imports, WebGPU primary, sprite art, audio).
 
 ## Scripts
 
@@ -22,3 +23,4 @@ the game will plug into.
 
 - Spec: `docs/superpowers/specs/2026-05-13-game-portfolio-rebuild-design.md`
 - Phase 1 plan: `docs/superpowers/plans/2026-05-13-phase-1-scaffold-and-static-site.md`
+- Phase 2 plan: `docs/superpowers/plans/2026-05-14-phase-2-gameshell-and-first-room.md`
