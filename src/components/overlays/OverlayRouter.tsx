@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { AnimatePresence } from 'motion/react';
 import { pauseCoordinator } from '@/game/pauseCoordinator';
 import { useGameEvent } from '@/hooks/useGameEvents';
 import { PortfolioOverlay } from './PortfolioOverlay';
@@ -25,8 +26,9 @@ export function OverlayRouter() {
     setActive(null);
   }, []);
 
-  if (active === 'portfolio') {
-    return <PortfolioOverlay onClose={close} />;
-  }
-  return null;
+  return (
+    <AnimatePresence>
+      {active === 'portfolio' && <PortfolioOverlay key="portfolio" onClose={close} />}
+    </AnimatePresence>
+  );
 }
