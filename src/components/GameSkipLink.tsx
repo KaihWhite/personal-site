@@ -1,10 +1,10 @@
 'use client';
 
-import { useGameEnabled } from '@/hooks/useGameEnabled';
+import { useGameEnabledContext } from '@/components/GameEnabledProvider';
 import styles from './GameSkipLink.module.scss';
 
 export function GameSkipLink() {
-  const { setPreference } = useGameEnabled();
+  const { setPreference } = useGameEnabledContext();
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
