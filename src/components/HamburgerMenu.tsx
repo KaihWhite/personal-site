@@ -3,6 +3,8 @@
 import type { Route } from 'next';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { gameBridge } from '@/game/bridge';
+import { useGameEnabled } from '@/hooks/useGameEnabled';
 import styles from './HamburgerMenu.module.scss';
 
 export type MenuContext = 'game' | 'static';
@@ -19,6 +21,7 @@ const SECTION_LINKS: Array<{ label: string; href: Route }> = [
 
 export function HamburgerMenu({ context }: HamburgerMenuProps) {
   const [open, setOpen] = useState(false);
+  const { enabled, setPreference } = useGameEnabled();
 
   useEffect(() => {
     if (!open) return;
@@ -28,6 +31,20 @@ export function HamburgerMenu({ context }: HamburgerMenuProps) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
+
+  // Spec §6.2: opening the menu pauses the game, closing resumes it.
+  // Only relevant on `/` (context === 'game' and the game canvas is mounted).
+  useEffect(() => {
+    if (context !== 'game' || !enabled) return;
+    gameBridge.emit(open ? 'react:pause' : 'react:resume', undefined);
+  }, [open, context, enabled]);
+
+  const handleToggleGame = () => {
+    setPreference(enabled ? 'disabled' : 'enabled');
+    if (typeof window !== 'undefined') {
+      window.location.reload();
+    }
+  };
 
   return (
     <div className={styles.menuContainer}>
@@ -52,6 +69,11 @@ export function HamburgerMenu({ context }: HamburgerMenuProps) {
               <Link href={link.href}>{link.label}</Link>
             </li>
           ))}
+          <li>
+            <button type="button" className={styles.action} onClick={handleToggleGame}>
+              {enabled ? 'Disable game' : 'Enable game'}
+            </button>
+          </li>
         </ul>
       )}
     </div>
