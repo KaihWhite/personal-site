@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { BootScene } from '@/game/scenes/BootScene';
 import { HubRoom } from '@/game/scenes/HubRoom';
+import { CorridorRoom } from '@/game/scenes/CorridorRoom';
 
 export interface CreateGameConfigParams {
   parent: HTMLElement;
@@ -24,7 +25,7 @@ export function createGameConfig({ parent }: CreateGameConfigParams): Phaser.Typ
         debug: false,
       },
     },
-    scene: [BootScene, HubRoom],
+    scene: [BootScene, HubRoom, CorridorRoom],
     fps: {
       target: 60,
     },
