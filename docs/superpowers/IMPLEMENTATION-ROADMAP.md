@@ -34,7 +34,7 @@ After Phase 3 ships, cutover (`rebuild` → `main`) + production deploy (Phase 4
 |---|---|---|---|
 | **0** Brainstorm + spec | done | [`specs/2026-05-13-game-portfolio-rebuild-design.md`](./specs/2026-05-13-game-portfolio-rebuild-design.md) | committed to `main` |
 | **1** Scaffold + static site | shipped | [`plans/2026-05-13-phase-1-scaffold-and-static-site.md`](./plans/2026-05-13-phase-1-scaffold-and-static-site.md) | committed to `rebuild`, pushed to origin |
-| **2** GameShell + HubRoom (vertical slice) | shipped | [`plans/2026-05-14-phase-2-gameshell-and-first-room.md`](./plans/2026-05-14-phase-2-gameshell-and-first-room.md) | committed to `rebuild`, not yet pushed |
+| **2** GameShell + HubRoom (vertical slice) | shipped | [`plans/2026-05-14-phase-2-gameshell-and-first-room.md`](./plans/2026-05-14-phase-2-gameshell-and-first-room.md) | committed to `rebuild`, pushed to origin |
 | **3** Remaining rooms + polish | not planned yet | — | — |
 | **4** Cutover (`rebuild` → `main`, deploy) | not planned yet | — | — |
 
