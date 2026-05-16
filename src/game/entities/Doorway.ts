@@ -13,6 +13,7 @@ export class Doorway extends Phaser.GameObjects.Container {
   private frame: Phaser.GameObjects.Rectangle;
   private prompt: Phaser.GameObjects.Text;
   private playerInside = false;
+  private readonly bounds: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle();
 
   constructor(scene: Phaser.Scene, x: number, y: number, section: OverlaySection) {
     super(scene, x, y);
@@ -35,8 +36,9 @@ export class Doorway extends Phaser.GameObjects.Container {
     this.add([fill, this.frame, this.prompt]);
   }
 
-  override getBounds(_output?: Phaser.Geom.Rectangle): Phaser.Geom.Rectangle {
-    return new Phaser.Geom.Rectangle(this.x - WIDTH / 2, this.y - HEIGHT, WIDTH, HEIGHT);
+  override getBounds<O extends Phaser.Geom.Rectangle>(_output?: O): O {
+    this.bounds.setTo(this.x - WIDTH / 2, this.y - HEIGHT, WIDTH, HEIGHT);
+    return this.bounds as unknown as O;
   }
 
   setPlayerInside(inside: boolean): void {

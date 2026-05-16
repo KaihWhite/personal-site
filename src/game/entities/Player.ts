@@ -19,6 +19,7 @@ export interface PlayerKeys {
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private keys: PlayerKeys;
+  private readonly bounds: Phaser.Geom.Rectangle = new Phaser.Geom.Rectangle();
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     const tex = Player.ensureTexture(scene);
@@ -69,6 +70,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (wantsJump && body.blocked.down) {
       body.setVelocityY(JUMP_VELOCITY);
     }
+  }
+
+  override getBounds<O extends Phaser.Geom.Rectangle>(_output?: O): O {
+    const body = this.body as Phaser.Physics.Arcade.Body | null;
+    if (body) {
+      this.bounds.setTo(body.x, body.y, body.width, body.height);
+    } else {
+      this.bounds.setTo(
+        this.x - this.displayWidth / 2,
+        this.y - this.displayHeight,
+        this.displayWidth,
+        this.displayHeight,
+      );
+    }
+    return this.bounds as unknown as O;
   }
 
   private static ensureTexture(scene: Phaser.Scene): string {
