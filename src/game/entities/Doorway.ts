@@ -11,7 +11,7 @@ export interface DoorwayOpts {
 }
 
 export class Doorway extends Phaser.GameObjects.Container {
-  readonly id: string;
+  readonly doorwayId: string;
   private frame: Phaser.GameObjects.Rectangle;
   private prompt: Phaser.GameObjects.Text;
   private playerInside = false;
@@ -19,7 +19,7 @@ export class Doorway extends Phaser.GameObjects.Container {
 
   constructor(scene: Phaser.Scene, x: number, y: number, opts: DoorwayOpts) {
     super(scene, x, y);
-    this.id = opts.id;
+    this.doorwayId = opts.id;
     scene.add.existing(this);
 
     const fill = scene.add.rectangle(0, 0, WIDTH, HEIGHT, FILL_COLOR);

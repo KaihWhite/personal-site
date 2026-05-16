@@ -54,7 +54,7 @@ describe('Doorway', () => {
   it('stores its id and renders the provided label as the prompt text', () => {
     const scene = makeFakeScene();
     const door = new Doorway(scene, 100, 200, { id: 'hub-to-portfolio', label: '↑ enter portfolio' });
-    expect(door.id).toBe('hub-to-portfolio');
+    expect(door.doorwayId).toBe('hub-to-portfolio');
     expect(scene.add.text).toHaveBeenCalledWith(0, expect.any(Number), '↑ enter portfolio', expect.any(Object));
   });
 
