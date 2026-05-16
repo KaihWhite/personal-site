@@ -86,9 +86,9 @@ Vertical slice of the game:
 - **`useGameEvent` hook** — typed bridge subscription with cleanup.
 - **First Phaser scene set** — `BootScene` → `HubRoom`. HubRoom contains: animated shader background (`Phaser.GameObjects.Shader` + inline GLSL), a ground platform, a silhouette `Player` rectangle (Arcade physics, A/D + arrows + W/Space/Up/Enter), one `Doorway` that emits `game:request-overlay` on interact.
 - **`<GameShell>`** — client component, ref-guarded mount (StrictMode-safe), dynamic-imported on `/`, skeleton overlay that fades on `game:ready`.
-- **`<PortfolioOverlay>`** — wraps the existing `<PortfolioContent>` with a close button + Escape handler + `react:resume` emission.
-- **`<OverlayRouter>`** — listens to `game:request-overlay`, mounts the right overlay, emits `react:pause`.
-- **`<HomeShell>`** — client component that defers the game-branch render until client mount (avoids SSR-vs-client hydration mismatch — see Pitfall #18), then branches on `useGameEnabled().enabled` between `<GameShell>` and `<PlaceholderLanding>`. `src/app/page.tsx` is a one-liner that renders this.
+- **`<PortfolioOverlay>`** — wraps the existing `<PortfolioContent>` with a close button + Escape handler. Calls `onClose` for both close paths; the resume contract lives in `<OverlayRouter>` (Phase 3a — see Pitfall ownership below).
+- **`<OverlayRouter>`** — listens to `game:request-overlay`, mounts the right overlay, and routes pause/resume through `pauseCoordinator.requestPause('overlay')` / `releasePause('overlay')` (Phase 3a refinement of the original direct-bridge emit).
+- **`<HomeShell>`** — client component that branches on `useGameEnabledContext()` between `<GameShell>` and `<PlaceholderLanding>`. The SSR-vs-client hydration gate (Pitfall #18) now lives in the Provider's `mounted` flag (Phase 3a). `src/app/page.tsx` is a one-liner that renders this.
 - **Accessibility** — `<GameSkipLink>` (visually-hidden first focusable element on `/` that disables the game), "Disable game" / "Enable game" toggle in the hamburger menu.
 - **E2E** — Playwright scene smoke: canvas mounts, walk-to-doorway opens overlay, Escape closes, `?nogame` falls back to static.
 
@@ -129,7 +129,7 @@ Architecture cleanup landed on top of Phase 2's vertical slice:
 | `dynamic(() => import('@/game/GameShell'), { ssr: false })` | Phaser touches `window` at module init; SSR import would crash. Also keeps Phaser out of static-route bundles. | Phase 2 (Tasks 9, 12) |
 | Static pages keep `<SiteLogo>`; `/` does not | Spec §6.3 default — preserve in-medias-res framing. | Phase 1 (Task 12) |
 | Doorway overlap by `Phaser.Geom.Rectangle.Overlaps` (not Arcade overlap callback) | One doorway per room → no perf reason to wire Arcade overlap. Visual entity stays free of physics body. | Phase 2 (Task 7) |
-| Menu opens → emit `react:pause` | Spec §6.2. Implemented via `useEffect` on the `open` flag in `HamburgerMenu`. | Phase 2 (Task 14) |
+| Menu opens → pause via `pauseCoordinator.requestPause('menu')` | Spec §6.2. Implemented via `useEffect` on the `open` flag in `HamburgerMenu`; the coordinator translates reasons into bridge events only on 0↔1 transitions. | Phase 2 (Task 14) → Phase 3a (Task 8) |
 
 ---
 
@@ -140,10 +140,8 @@ Listed so the next agent doesn't think they're missed bugs.
 - **WebGPU primary renderer.** Currently `Phaser.WEBGL`. Spec §2 says "WebGPU primary, WebGL fallback." Flip in Phase 3 with cross-browser QA.
 - **`.glsl` files via Turbopack raw imports.** Currently inline TS string exports. Spec §9.2 names `.glsl` files. Configure `next.config.mjs` `turbopack.rules` for `.glsl` and split shaders out.
 - **Sprite art for the player.** Idle / walk / jump frames per spec §8.3. Currently a rectangle.
-- **Motion v12 overlay transitions.** Currently no animation on overlay open/close. Spec §6.4 says "fade-in."
 - **Bundle-size CI gate** for the `/` route. Spec §10.3: under 500KB gzipped. No CI yet.
 - **`<img>` → `<Image>` migration** in `<PortfolioContent>` and `<AboutContent>` — 3 ESLint warnings flagged in Phase 1, deferred. Requires per-image dimensions or `fill` mode.
-- **Focus trap inside overlays.** Currently focuses the close button on open but doesn't trap. Acceptable for v1 since Escape always works.
 - **Per-room shaders.** Hub gets one in Phase 2; About / Portfolio / Contact rooms each need their own (spec §9.1).
 - **Global post-FX pipeline.** Vignette / chromatic aberration (spec §9.1).
 - **In-world `Panel` entity** for AboutRoom (spec §6.5, §8.1) — reads from `src/game/content/panels.ts`.
@@ -175,8 +173,8 @@ These were resolved during Phase 1 execution. Don't undo the resolutions.
 15. **`Phaser.GameObjects.Container.getBounds()` is generic over the output rect type.** Overriding with a plain return type triggers TS strict's `noImplicitOverride` AND a generic-mismatch error. Add `override` keyword and an ignored `_output?: Phaser.Geom.Rectangle` parameter. Already applied in `Doorway.getBounds()`.
 16. **Playwright headless Chromium needs SwiftShader launch args for WebGL.** Without them, `Phaser.WEBGL` fails to initialize and you get a blank canvas. Add `launchOptions.args: ['--use-gl=swiftshader', '--enable-webgl', '--ignore-gpu-blocklist', '--enable-unsafe-swiftshader']` to the Chromium project in `playwright.config.ts`. Already applied. Switching the runtime to `Phaser.AUTO` instead would defeat the shader visual on test environments — keep `Phaser.WEBGL` and configure Playwright.
 17. **Phaser's `JustDown()` can't observe `keyboard.press()`.** `page.keyboard.press('ArrowUp')` sends keydown+keyup atomically; Phaser sets the `_justDown` flag and immediately clears it on the keyup before any game frame can read it. Use `keyboard.down('ArrowUp')` + brief `waitForTimeout(100)` + `keyboard.up('ArrowUp')` for interact-style inputs in Playwright tests.
-18. **React 19 hydration mismatch in `<HomeShell>` if `useGameEnabled` disagrees between server and client.** `useGameEnabled` returns `{ enabled: true }` on SSR (no `window`) and may return `{ enabled: false }` on client (URL `?nogame`, mobile viewport, `prefers-reduced-motion: reduce`, stored "disabled" preference). React 19 logs a hydration error and the user sees a brief flash. Resolution applied in commit `11cad77`: gate `<HomeShell>` behind a `mounted` `useState(false)` set in `useEffect` — render `<PlaceholderLanding>` during SSR and first paint, swap to the game branch after mount.
-19. **`eslint-config-next` flags the `mounted = useState(false); useEffect(() => setMounted(true), [])` pattern via `react-hooks/set-state-in-effect`.** This is the canonical client-only-render pattern; targeted inline suppression (`// eslint-disable-line react-hooks/set-state-in-effect`) is correct. Applied in `<HomeShell>`.
+18. **React 19 hydration mismatch in `<HomeShell>` if `useGameEnabled` disagrees between server and client.** `useGameEnabled` returns `{ enabled: true }` on SSR (no `window`) and may return `{ enabled: false }` on client (URL `?nogame`, mobile viewport, `prefers-reduced-motion: reduce`, stored "disabled" preference). React 19 logs a hydration error and the user sees a brief flash. Resolution: gate the game branch behind a `mounted` `useState(false)` set in `useEffect` — render `<PlaceholderLanding>` during SSR and first paint, swap to the game branch after mount. Originally applied inline in `<HomeShell>` (Phase 2 commit `11cad77`); Phase 3a moved the gate into `<GameEnabledProvider>` (the `mounted` field on the context value) so every consumer reads the same gate.
+19. **`eslint-config-next` flags the `mounted = useState(false); useEffect(() => setMounted(true), [])` pattern via `react-hooks/set-state-in-effect`.** This is the canonical client-only-render pattern; targeted inline suppression (`// eslint-disable-next-line react-hooks/set-state-in-effect`) is correct. Lives in `<GameEnabledProvider>` after Phase 3a (was in `<HomeShell>` in Phase 2).
 20. **Phaser 3.90's `physics.add.existing(ground, true)` second-arg `true` means "static body".** Omitting it gives the ground a dynamic body that falls under gravity. The `true` is load-bearing; don't strip it as cleanup.
 
 ---
@@ -194,7 +192,7 @@ docs/superpowers/
 
 src/
   app/
-    layout.tsx          root layout (server)
+    layout.tsx          root layout (server) — wraps children in <GameEnabledProvider> (Phase 3a)
     page.tsx            renders <HomeShell> (Phase 2 onward)
     globals.scss
     portfolio/page.tsx  static — uses <PortfolioContent>
@@ -204,11 +202,12 @@ src/
     HamburgerMenu.tsx       top-right nav, Escape-closes, "Disable game" toggle (Phase 2)
     SiteLogo.tsx            top-left "KW" link, hidden on `/`
     PlaceholderLanding.tsx  Phase 1 stand-in / Phase 2 fallback when game disabled
-    HomeShell.tsx           CLIENT — branches on useGameEnabled (Phase 2)
+    HomeShell.tsx           CLIENT — branches on useGameEnabledContext (Phase 2 → 3a)
     GameSkipLink.tsx        a11y skip-link (Phase 2)
+    GameEnabledProvider.tsx CLIENT — single useGameEnabled() call site + mounted gate (Phase 3a)
     overlays/
-      OverlayRouter.tsx     bridge subscriber (Phase 2)
-      PortfolioOverlay.tsx  wraps PortfolioContent (Phase 2)
+      OverlayRouter.tsx     bridge subscriber + AnimatePresence wrapper (Phase 2 → 3a)
+      PortfolioOverlay.tsx  Motion v12 fade+slide; useFocusTrap (Phase 2 → 3a)
     content/
       PortfolioContent.tsx  single source of truth — used by static page AND overlay
       ContactContent.tsx
@@ -217,11 +216,13 @@ src/
   hooks/
     useIsMobile.ts          900px breakpoint
     usePrefersReducedMotion.ts
-    useGameEnabled.ts       auto-opt-out resolver — read this before touching the game-vs-static branch
+    useGameEnabled.ts       auto-opt-out resolver — called ONCE by GameEnabledProvider (Phase 3a)
     useGameEvents.ts        bridge subscription helper (Phase 2)
+    useFocusTrap.ts         Tab/Shift+Tab cycle within a container ref (Phase 3a)
     __tests__/              all hooks have tests
   game/                     ALL Phaser code (Phase 2 onward)
     bridge.ts               typed event emitter
+    pauseCoordinator.ts     reason-set singleton; owns react:pause/resume on 0↔1 transitions (Phase 3a)
     config.ts               Phaser game config factory
     GameShell.tsx           client component owning the Phaser lifecycle
     scenes/                 BootScene, HubRoom, then one per room
