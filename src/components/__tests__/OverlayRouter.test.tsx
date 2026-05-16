@@ -39,4 +39,18 @@ describe('OverlayRouter', () => {
     expect(spy).toHaveBeenCalledWith('overlay');
     spy.mockRestore();
   });
+
+  it('mounts ContactOverlay when game:request-overlay fires with section=contact', () => {
+    render(<OverlayRouter />);
+    act(() => gameBridge.emit('game:request-overlay', { section: 'contact' }));
+    expect(screen.getByRole('dialog', { name: /contact/i })).toBeInTheDocument();
+  });
+
+  it('calls pauseCoordinator.requestPause("overlay") when contact overlay opens', () => {
+    const spy = vi.spyOn(pauseCoordinator, 'requestPause');
+    render(<OverlayRouter />);
+    act(() => gameBridge.emit('game:request-overlay', { section: 'contact' }));
+    expect(spy).toHaveBeenCalledWith('overlay');
+    spy.mockRestore();
+  });
 });

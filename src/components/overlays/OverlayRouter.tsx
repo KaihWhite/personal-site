@@ -5,18 +5,16 @@ import { AnimatePresence } from 'motion/react';
 import { pauseCoordinator } from '@/game/pauseCoordinator';
 import { useGameEvent } from '@/hooks/useGameEvents';
 import { PortfolioOverlay } from './PortfolioOverlay';
+import { ContactOverlay } from './ContactOverlay';
 
-type ActiveSection = 'portfolio' | null;
+type ActiveSection = 'portfolio' | 'contact' | null;
 
 export function OverlayRouter() {
   const [active, setActive] = useState<ActiveSection>(null);
 
   const handleRequest = useCallback(({ section }: { section: 'portfolio' | 'contact' }) => {
-    if (section === 'portfolio') {
-      pauseCoordinator.requestPause('overlay');
-      setActive('portfolio');
-    }
-    // Phase 3b wires up the 'contact' overlay.
+    pauseCoordinator.requestPause('overlay');
+    setActive(section);
   }, []);
 
   useGameEvent('game:request-overlay', handleRequest);
@@ -29,6 +27,7 @@ export function OverlayRouter() {
   return (
     <AnimatePresence>
       {active === 'portfolio' && <PortfolioOverlay key="portfolio" onClose={close} />}
+      {active === 'contact'   && <ContactOverlay   key="contact"   onClose={close} />}
     </AnimatePresence>
   );
 }
