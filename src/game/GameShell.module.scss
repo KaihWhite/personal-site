@@ -1,0 +1,30 @@
+.shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #0a0612 0%, #1b1029 100%);
+  color: rgba(245, 245, 245, 0.6);
+  font-family: monospace;
+  font-size: 0.95rem;
+  transition: opacity 200ms ease-out;
+}
+
+.skeletonHidden {
+  opacity: 0;
+  pointer-events: none;
+}
