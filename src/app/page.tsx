@@ -1,11 +1,5 @@
-import { HamburgerMenu } from '@/components/HamburgerMenu';
-import { PlaceholderLanding } from '@/components/PlaceholderLanding';
+import { HomeShell } from '@/components/HomeShell';
 
 export default function HomePage() {
-  return (
-    <>
-      <HamburgerMenu context="game" />
-      <PlaceholderLanding />
-    </>
-  );
+  return <HomeShell />;
 }
