@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { gameBridge } from '@/game/bridge';
+import { pauseCoordinator } from '@/game/pauseCoordinator';
 import { useGameEvent } from '@/hooks/useGameEvents';
 import { PortfolioOverlay } from './PortfolioOverlay';
 
@@ -12,15 +12,18 @@ export function OverlayRouter() {
 
   const handleRequest = useCallback(({ section }: { section: 'portfolio' | 'contact' }) => {
     if (section === 'portfolio') {
-      gameBridge.emit('react:pause', undefined);
+      pauseCoordinator.requestPause('overlay');
       setActive('portfolio');
     }
-    // Phase 3 wires up the 'contact' overlay.
+    // Phase 3b wires up the 'contact' overlay.
   }, []);
 
   useGameEvent('game:request-overlay', handleRequest);
 
-  const close = useCallback(() => setActive(null), []);
+  const close = useCallback(() => {
+    pauseCoordinator.releasePause('overlay');
+    setActive(null);
+  }, []);
 
   if (active === 'portfolio') {
     return <PortfolioOverlay onClose={close} />;
