@@ -4,16 +4,14 @@ import { Player } from '@/game/entities/Player';
 import { Doorway } from '@/game/entities/Doorway';
 import roomBgGlsl from '@/game/shaders/room-bg.glsl';
 import { HUB_PALETTE } from '@/game/shaders/roomPalettes';
+import { RoomScene } from './RoomScene';
 
 const GROUND_HEIGHT = 64;
 const GROUND_FILL = 0x0a0612;
 
-export class HubRoom extends Phaser.Scene {
+export class HubRoom extends RoomScene {
   private player!: Player;
   private doorway!: Doorway;
-  private paused = false;
-  private offPause: (() => void) | undefined;
-  private offResume: (() => void) | undefined;
 
   constructor() {
     super({ key: 'HubRoom' });
@@ -48,11 +46,7 @@ export class HubRoom extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, width, height);
     this.physics.world.setBounds(0, 0, width, height);
 
-    this.offPause = gameBridge.on('react:pause', () => this.handlePause());
-    this.offResume = gameBridge.on('react:resume', () => this.handleResume());
-
-    this.events.once('shutdown', () => this.detachBridge());
-    this.events.once('destroy', () => this.detachBridge());
+    this.wireBridge();
 
     gameBridge.emit('game:ready', undefined);
     gameBridge.emit('game:scene-changed', { room: 'HubRoom' });
@@ -67,24 +61,5 @@ export class HubRoom extends Phaser.Scene {
     if (inside && this.player.isInteractPressed()) {
       gameBridge.emit('game:request-overlay', { section: 'portfolio' });
     }
-  }
-
-  private handlePause(): void {
-    if (this.paused) return;
-    this.paused = true;
-    this.physics.world.pause();
-  }
-
-  private handleResume(): void {
-    if (!this.paused) return;
-    this.paused = false;
-    this.physics.world.resume();
-  }
-
-  private detachBridge(): void {
-    this.offPause?.();
-    this.offResume?.();
-    this.offPause = undefined;
-    this.offResume = undefined;
   }
 }
