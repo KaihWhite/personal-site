@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 import { HamburgerMenu } from '@/components/HamburgerMenu';
 import { OverlayRouter } from '@/components/overlays/OverlayRouter';
 import { PlaceholderLanding } from '@/components/PlaceholderLanding';
@@ -13,9 +14,14 @@ const GameShell = dynamic(
 );
 
 export function HomeShell() {
+  const [mounted, setMounted] = useState(false);
   const { enabled } = useGameEnabled();
 
-  if (enabled) {
+  useEffect(() => {
+    setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
+
+  if (mounted && enabled) {
     return (
       <>
         <GameSkipLink />
