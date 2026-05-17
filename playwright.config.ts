@@ -12,6 +12,8 @@ export default defineConfig({
     reducedMotion: 'no-preference',
   },
   projects: [
+    // Chromium runs the full suite (static + game). Game tests rely on SwiftShader
+    // launch args to get WebGL in headless mode — Chromium-only flags.
     {
       name: 'chromium',
       use: {
@@ -25,6 +27,31 @@ export default defineConfig({
           ],
         },
       },
+    },
+    // Firefox/WebKit/mobile projects run static-pages.spec.ts only.
+    // - Firefox/WebKit headless WebGL is unreliable across versions; the game itself
+    //   is verified manually on these browsers (see Task 4).
+    // - Mobile viewports auto-opt-out via useIsMobile (900px breakpoint), so the
+    //   game canvas is intentionally absent — only the static fallback is exercised.
+    {
+      name: 'firefox',
+      testMatch: /static-pages\.spec\.ts$/,
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      testMatch: /static-pages\.spec\.ts$/,
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'mobile-chrome',
+      testMatch: /static-pages\.spec\.ts$/,
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'mobile-safari',
+      testMatch: /static-pages\.spec\.ts$/,
+      use: { ...devices['iPhone 13'] },
     },
   ],
   webServer: {

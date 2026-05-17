@@ -249,4 +249,12 @@ test.describe('game-route smoke', () => {
     // Canvas remains.
     await expect(page.locator('canvas')).toBeVisible();
   });
+
+  test('back-to-the-world link from a static page mounts the game', async ({ page }) => {
+    await page.goto('/about');
+    await page.getByRole('button', { name: /open menu/i }).click();
+    await page.getByRole('link', { name: /back to the world/i }).click();
+    await expect(page).toHaveURL('/');
+    await expect(page.locator('canvas')).toBeVisible({ timeout: 8000 });
+  });
 });

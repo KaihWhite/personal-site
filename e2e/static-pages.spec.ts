@@ -34,7 +34,8 @@ test.describe('static site smoke', () => {
     await page.getByRole('button', { name: /open menu/i }).click();
     await page.getByRole('link', { name: /back to the world/i }).click();
     await expect(page).toHaveURL('/');
-    await expect(page.locator('canvas')).toBeVisible({ timeout: 8000 });
+    // Whether the canvas appears depends on browser/viewport (auto-opt-out for mobile/webkit).
+    // The chromium-only canvas assertion lives in e2e/game-route.spec.ts.
   });
 
   test('Escape closes the menu', async ({ page }) => {
