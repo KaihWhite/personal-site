@@ -88,7 +88,7 @@ Vertical slice of the game:
 
 - **Bridge** — `src/game/bridge.ts`, a typed singleton event emitter shared between Phaser scenes and React. Channels: `react:pause`, `react:resume`, `react:reduce-motion`, `game:request-overlay`, `game:ready`, `game:scene-changed`. Pure TS, no Phaser dependency, jsdom-testable.
 - **`useGameEvent` hook** — typed bridge subscription with cleanup.
-- **First Phaser scene set** — `BootScene` → `HubRoom`. HubRoom contains: animated shader background (`Phaser.GameObjects.Shader` + inline GLSL), a ground platform, a silhouette `Player` rectangle (Arcade physics, A/D + arrows + W/Space/Up/Enter), one `Doorway` that emits `game:request-overlay` on interact.
+- **First Phaser scene set** — `BootScene` → `HubRoom`. HubRoom contains: an animated shader background, a ground platform, a silhouette `Player` rectangle (Arcade physics, A/D + arrows + W/Space/Up/Enter), and `Doorway` entities. `Doorway` is a visual+proximity entity (`{ id, label }` opts post-3b refactor); each scene's `update()` owns the interact dispatch — `gameBridge.emit('game:request-overlay', …)` for content rooms, `scene.transition(…)` for HubRoom doorways into the corridor.
 - **`<GameShell>`** — client component, ref-guarded mount (StrictMode-safe), dynamic-imported on `/`, skeleton overlay that fades on `game:ready`.
 - **`<PortfolioOverlay>`** — wraps the existing `<PortfolioContent>` with a close button + Escape handler. Calls `onClose` for both close paths; the resume contract lives in `<OverlayRouter>` (Phase 3a — see Pitfall ownership below).
 - **`<OverlayRouter>`** — listens to `game:request-overlay`, mounts the right overlay, and routes pause/resume through `pauseCoordinator.requestPause('overlay')` / `releasePause('overlay')` (Phase 3a refinement of the original direct-bridge emit).
@@ -150,7 +150,7 @@ Multi-room world + production polish on top of Phase 3a:
 | `<HomeShell>` client component (not direct conditional in `page.tsx`) | Keeps `page.tsx` a server component; `useGameEnabled` requires client. | Phase 2 (Task 12) |
 | `dynamic(() => import('@/game/GameShell'), { ssr: false })` | Phaser touches `window` at module init; SSR import would crash. Also keeps Phaser out of static-route bundles. | Phase 2 (Tasks 9, 12) |
 | Static pages keep `<SiteLogo>`; `/` does not | Spec §6.3 default — preserve in-medias-res framing. | Phase 1 (Task 12) |
-| Doorway overlap by `Phaser.Geom.Rectangle.Overlaps` (not Arcade overlap callback) | One doorway per room → no perf reason to wire Arcade overlap. Visual entity stays free of physics body. | Phase 2 (Task 7) |
+| Doorway overlap by `Phaser.Geom.Rectangle.Overlaps` (not Arcade overlap callback) | A handful of doorways per room and cached `getBounds()` rects make the per-frame check trivially cheap. Visual entity stays free of physics body. | Phase 2 (Task 7) → Phase 3b (Task 7) |
 | Menu opens → pause via `pauseCoordinator.requestPause('menu')` | Spec §6.2. Implemented via `useEffect` on the `open` flag in `HamburgerMenu`; the coordinator translates reasons into bridge events only on 0↔1 transitions. | Phase 2 (Task 14) → Phase 3a (Task 8) |
 
 ---
