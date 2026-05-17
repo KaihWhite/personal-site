@@ -45,4 +45,11 @@ test.describe('static site smoke', () => {
     await page.keyboard.press('Escape');
     await expect(page.getByRole('link', { name: 'Portfolio' })).not.toBeVisible();
   });
+
+  test('mobile viewport auto-opts-out of the game on /', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'mobile-only — desktop viewports run the game-route smoke instead');
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: /hello there/i })).toBeVisible();
+    await expect(page.locator('canvas')).not.toBeVisible();
+  });
 });
