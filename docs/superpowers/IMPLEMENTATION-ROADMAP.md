@@ -14,22 +14,22 @@
 
 ## Where to start (next concrete move)
 
-**Phase 4 cutover.** Plan 3b shipped. The rebuild is feature-complete; merge `rebuild` → `main` and cut a Vercel production deploy.
+**Phase 4 in progress.** CI + cross-browser Playwright + README are landed on `rebuild`. The fast-forward merge into `main` (Task 7 of the Phase 4 plan) is the next mechanical step. After merge, Vercel auto-deploys `main` — verify the live URL per Task 8.
 
 ```bash
 # you are here
 git checkout rebuild
 git pull origin rebuild
-git log --oneline -1   # should be: <Phase 3b top SHA>
+git log --oneline -1   # should be: <Phase 4 docs/roadmap top SHA>
+
+# fast-forward main
+git checkout main
+git pull origin main
+git merge --ff-only rebuild
+git push origin main
 ```
 
-Phase 4 plan items (to be written when the user is ready to cut over):
-1. Final cross-browser QA (Chrome / Firefox / Safari desktop; iOS / Android Chrome via Playwright mobile profiles).
-2. README rewrite for `main` (drop "rebuild" framing).
-3. Vercel deployment review (next.config.mjs in Vercel build; SSG sanity; client-only Phaser).
-4. Merge strategy — fast-forward or squash.
-5. GitHub Actions wiring for the bundle gate on PRs to `main`.
-6. Post-cutover backlog: WebGPU flip, ambient audio, global post-FX, additional sprite states, per-corridor palette blends, sprite art commissioning.
+If `--ff-only` errors (it shouldn't — `git rev-list --count rebuild..main` was 0 at plan time), investigate before forcing.
 
 ---
 
@@ -43,7 +43,7 @@ Phase 4 plan items (to be written when the user is ready to cut over):
 | **3** design spec (covers 3a + 3b) | done | [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) | committed to `rebuild`, pushed to origin |
 | **3a** Architecture cleanup | shipped | [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) | committed to `rebuild`, pushed to origin |
 | **3b** Room expansion + Player sprite + per-room shaders + ContactOverlay + bundle CI | shipped | [`plans/2026-05-16-phase-3b-multi-room-and-polish.md`](./plans/2026-05-16-phase-3b-multi-room-and-polish.md) | committed to `rebuild`, pushed to origin |
-| **4** Cutover (`rebuild` → `main`, deploy) | not planned yet | — | — |
+| **4** Cutover (`rebuild` → `main`, deploy) | plan ready | [`plans/2026-05-17-phase-4-cutover-and-production-deploy.md`](./plans/2026-05-17-phase-4-cutover-and-production-deploy.md) | pending merge |
 
 ---
 
