@@ -14,18 +14,22 @@
 
 ## Where to start (next concrete move)
 
-**Write Plan 3b.** Plan 3a shipped cleanly on `rebuild`. Plan 3b ships the multi-room world.
+**Phase 4 cutover.** Plan 3b shipped. The rebuild is feature-complete; merge `rebuild` → `main` and cut a Vercel production deploy.
 
 ```bash
 # you are here
 git checkout rebuild
 git pull origin rebuild
-git log --oneline -1   # should be: <Phase 3a top SHA>
+git log --oneline -1   # should be: <Phase 3b top SHA>
 ```
 
-Use `/superpowers:writing-plans` against the Phase 3 spec sections that 3a doesn't touch — see the "Phase 3b forward-pointer" section at the bottom of this file.
-
-After 3b ships and the prototype works end-to-end: Phase 4 cutover (`rebuild` → `main`, Vercel production deploy).
+Phase 4 plan items (to be written when the user is ready to cut over):
+1. Final cross-browser QA (Chrome / Firefox / Safari desktop; iOS / Android Chrome via Playwright mobile profiles).
+2. README rewrite for `main` (drop "rebuild" framing).
+3. Vercel deployment review (next.config.mjs in Vercel build; SSG sanity; client-only Phaser).
+4. Merge strategy — fast-forward or squash.
+5. GitHub Actions wiring for the bundle gate on PRs to `main`.
+6. Post-cutover backlog: WebGPU flip, ambient audio, global post-FX, additional sprite states, per-corridor palette blends, sprite art commissioning.
 
 ---
 
@@ -38,7 +42,7 @@ After 3b ships and the prototype works end-to-end: Phase 4 cutover (`rebuild` �
 | **2** GameShell + HubRoom (vertical slice) | shipped | [`plans/2026-05-14-phase-2-gameshell-and-first-room.md`](./plans/2026-05-14-phase-2-gameshell-and-first-room.md) | committed to `rebuild`, pushed to origin |
 | **3** design spec (covers 3a + 3b) | done | [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) | committed to `rebuild`, pushed to origin |
 | **3a** Architecture cleanup | shipped | [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) | committed to `rebuild`, pushed to origin |
-| **3b** Room expansion + Player sprite + per-room shaders + ContactOverlay + bundle CI | planned (spec done; plan pending) | [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) | not started |
+| **3b** Room expansion + Player sprite + per-room shaders + ContactOverlay + bundle CI | shipped | [`plans/2026-05-16-phase-3b-multi-room-and-polish.md`](./plans/2026-05-16-phase-3b-multi-room-and-polish.md) | committed to `rebuild`, not yet pushed |
 | **4** Cutover (`rebuild` → `main`, deploy) | not planned yet | — | — |
 
 ---
@@ -112,6 +116,24 @@ Architecture cleanup landed on top of Phase 2's vertical slice:
 
 ---
 
+## What Phase 3b shipped
+
+Multi-room world + production polish on top of Phase 3a:
+
+- **5 Phaser scenes.** `HubRoom` (central spawn, 3 doorways), `PortfolioRoom` / `ContactRoom` (return doorway + viewing doorway → overlay), `AboutRoom` (return doorway + 3 in-world `Panel`s, no overlay), `CorridorRoom` (shared scene, 6 named spawn points via `parseCorridorSpawn`). All scenes extend `RoomScene` (new abstract base; centralizes bridge wiring + pauseCoordinator-aware cross-scene pause persistence).
+- **Factored shader system.** Single `src/game/shaders/room-bg.glsl` (raw-imported via Turbopack rule + `raw-loader`) driven by per-room palettes in `roomPalettes.ts`. Replaces Phase 2's inline TS-string `hub-bg.ts` (deleted).
+- **Player sprite + anim state machine.** Spritesheet at `public/sprites/player.png` (8 × 3 grid, 32 × 56 frames). `BootScene` preloads + registers idle/walk/jump anims. `Player.update()` picks the right anim from physics state (grounded + moving) and flips facing on velocity sign. If `player.png` is absent, Player falls back to the Phase 2 generated rectangle texture — codepath ships without art.
+- **Doorway refactor.** Phase 2's section-aware `Doorway` is now a dumb visual+proximity entity (`{ id, label }` opts). Each scene's `update()` owns the dispatch on interact — `scene.transition()` for room links, `gameBridge.emit('game:request-overlay', …)` for content viewers.
+- **`<ContactOverlay>`.** Mirrors `<PortfolioOverlay>` (Motion v12 fade+slide, useFocusTrap, Escape-to-close). Plugs into the OverlayRouter pattern Phase 3a established — `OverlayRouter` now routes both `'portfolio'` and `'contact'`.
+- **`Panel` entity.** In-world content reader. Post visible always; headline always; body reveals on player proximity (`getBounds()` returns an 80-px-padded zone wider than the visual post). AboutRoom hosts 3 (`ABOUT_PANELS` in `src/game/content/panels.ts`).
+- **WebGL auto-opt-out.** `useGameEnabled` probes `getContext('webgl2') ?? getContext('webgl')` on mount; if both return null, the resolver returns `{ enabled: false, reason: 'no-webgl' }`. Visitors with WebGL disabled (Chrome hardware-accel off; older browsers) see `<PlaceholderLanding>` instead of a Phaser crash. Probe is SSR-safe (assumes true on the server; client effect flips on cold paint).
+- **Menu z-index fix.** Hamburger menu container raised to `z-index: 102` + `isolation: isolate` so it floats above the overlay backdrop (`z-index: 100`) and close button (`z-index: 101`). Without this, opening the menu while an overlay is up was impossible — which is exactly the scenario the Phase 3a pauseCoordinator was designed to handle. (Surfaced during Task 18 E2E.)
+- **Bundle-size gate.** `scripts/check-bundle-size.mjs` walks `.next/build-manifest.json` + per-route `page_client-reference-manifest.js`, gzips each route's chunks, and exits non-zero if any route exceeds its threshold (`/` ≤ 500 KB; static routes ≤ 300 KB — raised from spec's 100 KB because the React+Next runtime alone is ~168 KB gzipped, making 100 KB unachievable). `npm test` runs vitest → build → check:bundle as one composite gate. CI hosting is deferred to Phase 4.
+
+**Test counts after 3b:** 80 unit (up from 58), 12 E2E (multi-room walks for each branch + pause regression). All green at HEAD.
+
+---
+
 ## Architectural decisions made along the way
 
 | Decision | Why | Where |
@@ -137,14 +159,11 @@ Architecture cleanup landed on top of Phase 2's vertical slice:
 
 Listed so the next agent doesn't think they're missed bugs.
 
-- **WebGPU primary renderer.** Currently `Phaser.WEBGL`. Spec §2 says "WebGPU primary, WebGL fallback." Flip in Phase 3 with cross-browser QA.
-- **`.glsl` files via Turbopack raw imports.** Currently inline TS string exports. Spec §9.2 names `.glsl` files. Configure `next.config.mjs` `turbopack.rules` for `.glsl` and split shaders out.
-- **Sprite art for the player.** Idle / walk / jump frames per spec §8.3. Currently a rectangle.
-- **Bundle-size CI gate** for the `/` route. Spec §10.3: under 500KB gzipped. No CI yet.
+- **WebGPU primary renderer.** Currently `Phaser.WEBGL`. Spec §2 says "WebGPU primary, WebGL fallback." Flip in Phase 4+ with cross-browser QA.
+- **Sprite art for the player.** Idle / walk / jump frames per spec §8.3. The anim state machine codepath ships in 3b; the player falls back to the Phase 2 rectangle if `public/sprites/player.png` is absent. Only the PNG is user-supplied.
+- **Hosted CI for the bundle gate (Phase 4).** Local `npm test` gate ships in 3b (`scripts/check-bundle-size.mjs`). GitHub Actions wiring for PRs to `main` is deferred to Phase 4.
 - **`<img>` → `<Image>` migration** in `<PortfolioContent>` and `<AboutContent>` — 3 ESLint warnings flagged in Phase 1, deferred. Requires per-image dimensions or `fill` mode.
-- **Per-room shaders.** Hub gets one in Phase 2; About / Portfolio / Contact rooms each need their own (spec §9.1).
 - **Global post-FX pipeline.** Vignette / chromatic aberration (spec §9.1).
-- **In-world `Panel` entity** for AboutRoom (spec §6.5, §8.1) — reads from `src/game/content/panels.ts`.
 - **`react:reduce-motion` runtime toggle.** Bridge event exists but isn't wired; auto-opt-out at boot covers the common case.
 - **Ambient audio loop.** Spec §12 lists as out-of-scope-for-now; trivial to add later behind a first-input gate.
 - **Site-wide font choice.** Currently system-ui everywhere. Probably fine for the silhouette aesthetic; revisit if it feels generic.
@@ -188,7 +207,8 @@ docs/superpowers/
   specs/2026-05-16-phase-3-multi-room-and-polish-design.md  Phase 3 design (covers 3a + 3b)
   plans/2026-05-13-phase-1-scaffold-and-static-site.md
   plans/2026-05-14-phase-2-gameshell-and-first-room.md
-  plans/2026-05-16-phase-3a-architecture-cleanup.md  ← next to execute
+  plans/2026-05-16-phase-3a-architecture-cleanup.md
+  plans/2026-05-16-phase-3b-multi-room-and-polish.md ← last shipped
 
 src/
   app/
@@ -199,15 +219,16 @@ src/
     contact/page.tsx    static — uses <ContactContent>
     about/page.tsx      static — uses <AboutContent>
   components/
-    HamburgerMenu.tsx       top-right nav, Escape-closes, "Disable game" toggle (Phase 2)
+    HamburgerMenu.tsx       top-right nav, Escape-closes, "Disable game" toggle; z-index 102 (Phase 2 → 3b)
     SiteLogo.tsx            top-left "KW" link, hidden on `/`
     PlaceholderLanding.tsx  Phase 1 stand-in / Phase 2 fallback when game disabled
     HomeShell.tsx           CLIENT — branches on useGameEnabledContext (Phase 2 → 3a)
     GameSkipLink.tsx        a11y skip-link (Phase 2)
     GameEnabledProvider.tsx CLIENT — single useGameEnabled() call site + mounted gate (Phase 3a)
     overlays/
-      OverlayRouter.tsx     bridge subscriber + AnimatePresence wrapper (Phase 2 → 3a)
+      OverlayRouter.tsx     bridge subscriber + AnimatePresence wrapper; routes portfolio + contact (Phase 2 → 3b)
       PortfolioOverlay.tsx  Motion v12 fade+slide; useFocusTrap (Phase 2 → 3a)
+      ContactOverlay.tsx    mirrors PortfolioOverlay; routes 'contact' overlay events (Phase 3b)
     content/
       PortfolioContent.tsx  single source of truth — used by static page AND overlay
       ContactContent.tsx
@@ -216,7 +237,7 @@ src/
   hooks/
     useIsMobile.ts          900px breakpoint
     usePrefersReducedMotion.ts
-    useGameEnabled.ts       auto-opt-out resolver — called ONCE by GameEnabledProvider (Phase 3a)
+    useGameEnabled.ts       auto-opt-out resolver — WebGL probe added (Phase 3a → 3b)
     useGameEvents.ts        bridge subscription helper (Phase 2)
     useFocusTrap.ts         Tab/Shift+Tab cycle within a container ref (Phase 3a)
     __tests__/              all hooks have tests
@@ -225,14 +246,35 @@ src/
     pauseCoordinator.ts     reason-set singleton; owns react:pause/resume on 0↔1 transitions (Phase 3a)
     config.ts               Phaser game config factory
     GameShell.tsx           client component owning the Phaser lifecycle
-    scenes/                 BootScene, HubRoom, then one per room
-    entities/               Player, Doorway, then Panel
-    shaders/                inline GLSL strings (Phase 2) → .glsl files (Phase 3)
+    scenes/
+      BootScene.ts          preloads spritesheet + registers anims (Phase 2 → 3b)
+      RoomScene.ts          abstract base; bridge wiring + cross-scene pause (Phase 3b)
+      HubRoom.ts            central spawn, 3 doorways (Phase 2 → 3b)
+      CorridorRoom.ts       shared corridor; 6 named spawn points via parseCorridorSpawn (Phase 3b)
+      PortfolioRoom.ts      return doorway + overlay doorway → portfolio overlay (Phase 3b)
+      ContactRoom.ts        return doorway + overlay doorway → contact overlay (Phase 3b)
+      AboutRoom.ts          return doorway + 3 in-world Panels (Phase 3b)
+    entities/
+      Player.ts             sprite-key with rectangle fallback; anim state machine + facing flip (Phase 2 → 3b)
+      Doorway.ts            dumb visual+proximity entity; {id,label} opts (Phase 2 → 3b)
+      Panel.ts              in-world content reader; 80-px proximity zone (Phase 3b)
+    shaders/
+      room-bg.glsl          shared background shader; palette uniforms per room (Phase 3b)
+    content/
+      panels.ts             ABOUT_PANELS content data for AboutRoom (Phase 3b)
+      roomPalettes.ts       per-room palette configs consumed by room-bg.glsl (Phase 3b)
   vitest.d.ts               jest-dom matcher types
 
+scripts/
+  check-bundle-size.mjs     gzip-walks build-manifest; exits non-zero if route exceeds threshold (Phase 3b)
+
+public/
+  sprites/
+    player.png              8×3 spritesheet (32×56 frames); user-supplied; rectangle fallback if absent
+
 eslint.config.mjs           flat config — DO NOT migrate back to .eslintrc.json
-next.config.mjs             typedRoutes top-level
-playwright.config.ts        reducedMotion + viewport pinned for Phase 2 game tests
+next.config.mjs             typedRoutes top-level; Turbopack raw-loader rule for .glsl (Phase 3b)
+playwright.config.ts        reducedMotion + viewport pinned; multi-room walk tests (Phase 2 → 3b)
 tsconfig.json               strict + moduleResolution: bundler
 ```
 
@@ -247,25 +289,3 @@ tsconfig.json               strict + moduleResolution: bundler
 - TDD is real: hooks have tests with mocked deps, components have behavior tests via RTL, integration is covered by Playwright. The user accepted this pattern across Phase 1 without pushback — keep it.
 - Don't store project context in Claude memory — keep it in this repo (this file and the phase plans). The user prefers project knowledge to travel with the project, not with the agent.
 
----
-
-## Phase 3b forward-pointer (write the plan after Plan 3a ships)
-
-Plan 3a covers the architecture cleanup subsystem (pauseCoordinator, GameEnabledProvider context lift, Motion v12 overlay transitions, focus trap, getBounds cache, BootScene timing, skeleton a11y, first-mount guard). When 3a is shipped and pushed, write **Plan 3b** against the Phase 3 spec sections that 3a doesn't touch:
-
-- **5 Phaser scenes** — HubRoom rebuilt as central spawn with 3 doorways, PortfolioRoom (existing overlay; new return doorway), AboutRoom (with Panels), ContactRoom (with new ContactOverlay), CorridorRoom (shared scene with named spawn points). Spec §4.
-- **Panel entity** — new in-world content reader for AboutRoom; reads on player proximity, no overlay. Spec §7.
-- **ContactOverlay** — mirrors PortfolioOverlay; new test file. Plugs into the OverlayRouter pattern 3a already migrated. Spec §9 minor.
-- **Per-room shader strategy** — one shared `room-bg.glsl` with palette + motion uniforms; `roomPalettes.ts` per-room configs; delete `hub-bg.ts`. Requires `.glsl` raw imports via Turbopack rule in `next.config.mjs`. Spec §6, §9.5.
-- **Player sprite + AnimationManager** — preload `public/sprites/player.png`, register idle/walk/jump anims in BootScene, swap Player to use sprite frames (fall back to rectangle if asset missing). Spec §8.
-- **Bundle-size CI gate** — `scripts/check-bundle-size.mjs` script; `/` < 500KB gzipped, static routes < 100KB each; runs as part of `npm test`. Spec §10.
-
-**Explicit non-goals** (kicked beyond Phase 3 per the spec):
-- WebGPU renderer flip (stays Phaser.WEBGL; SwiftShader Playwright args preserved).
-- Global post-FX pipeline (vignette / chromatic aberration).
-- Ambient audio loop.
-- Sprite-art sourcing (Plan 3b codes against the contract; user supplies the PNG or accepts the rectangle fallback).
-- Additional sprite states (landing, near-doorway, turn-around).
-- Hosted CI (GitHub Actions) for the bundle gate — local `npm test` only in 3b.
-
-After Plan 3b ships and the prototype works end-to-end, merge `rebuild` → `main` (Phase 4 / cutover) and update the README.
