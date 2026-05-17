@@ -14,22 +14,17 @@
 
 ## Where to start (next concrete move)
 
-**Phase 4 in progress.** CI + cross-browser Playwright + README are landed on `rebuild`. The fast-forward merge into `main` (Task 7 of the Phase 4 plan) is the next mechanical step. After merge, Vercel auto-deploys `main` — verify the live URL per Task 8.
+**Phase 4 cutover is paused — polish work next.** Tasks 1–6 of the Phase 4 plan (CI workflow, cross-browser Playwright, README + roadmap framing) shipped to `rebuild`. Tasks 7–8 (the FF merge to `main` + Vercel production deploy) are deferred. The user's call after reviewing the current state: it still reads as a prototype. The cutover gate is now polish, not test health.
 
-```bash
-# you are here
-git checkout rebuild
-git pull origin rebuild
-git log --oneline -1   # should be: <Phase 4 docs/roadmap top SHA>
+Five polish tracks gating the cutover (to be brainstormed and planned as Phase 5):
 
-# fast-forward main
-git checkout main
-git pull origin main
-git merge --ff-only rebuild
-git push origin main
-```
+1. **Player sprite art.** `public/sprites/player.png` (8 × 3 grid, 32 × 56 frames). Anim state machine codepath already ships; player currently falls back to the Phase 2 generated rectangle.
+2. **Room visuals.** Backgrounds, palette, and lighting feel placeholder. Listed in the roadmap backlog: global post-FX pipeline (vignette / chromatic aberration), per-corridor palette blends.
+3. **Content depth.** `PortfolioContent` / `AboutContent` / `ContactContent` and `ABOUT_PANELS` data need more substantive copy.
+4. **Typography + UI polish.** System-ui everywhere; menu, overlays, placeholder landing copy all need a pass.
+5. **Actual platformer levels.** Rooms today are single-screen entry/return doorways. The game needs explorable platformer level content — jumps, obstacles, secrets — beyond the navigation skeleton.
 
-If `--ff-only` errors (it shouldn't — `git rev-list --count rebuild..main` was 0 at plan time), investigate before forcing.
+When polish ships, resume Phase 4 from Task 7 of [`plans/2026-05-17-phase-4-cutover-and-production-deploy.md`](./plans/2026-05-17-phase-4-cutover-and-production-deploy.md). Pre-merge FF safety still holds: `git rev-list --count rebuild..main` was 0 when the plan was written and nothing has landed on `main` since.
 
 ---
 
@@ -43,7 +38,8 @@ If `--ff-only` errors (it shouldn't — `git rev-list --count rebuild..main` was
 | **3** design spec (covers 3a + 3b) | done | [`specs/2026-05-16-phase-3-multi-room-and-polish-design.md`](./specs/2026-05-16-phase-3-multi-room-and-polish-design.md) | committed to `rebuild`, pushed to origin |
 | **3a** Architecture cleanup | shipped | [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) | committed to `rebuild`, pushed to origin |
 | **3b** Room expansion + Player sprite + per-room shaders + ContactOverlay + bundle CI | shipped | [`plans/2026-05-16-phase-3b-multi-room-and-polish.md`](./plans/2026-05-16-phase-3b-multi-room-and-polish.md) | committed to `rebuild`, pushed to origin |
-| **4** Cutover (`rebuild` → `main`, deploy) | plan ready | [`plans/2026-05-17-phase-4-cutover-and-production-deploy.md`](./plans/2026-05-17-phase-4-cutover-and-production-deploy.md) | pending merge |
+| **4** Cutover (`rebuild` → `main`, deploy) | deferred (post-polish) | [`plans/2026-05-17-phase-4-cutover-and-production-deploy.md`](./plans/2026-05-17-phase-4-cutover-and-production-deploy.md) | Tasks 1–6 shipped to `rebuild`; Tasks 7–8 wait for polish |
+| **5** Polish (sprite art / room visuals / content / typography / level design) | brainstorm next | — | — |
 
 ---
 

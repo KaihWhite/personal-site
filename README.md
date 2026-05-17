@@ -1,6 +1,8 @@
 # kaihwhite.com
 
-Personal site of Kaih White. The landing page is a 2D Phaser sidescroller; mobile, low-power, and `prefers-reduced-motion` visitors auto-fall-back to a static page navigated by the same top-right menu.
+Personal site of Kaih White, currently being rebuilt. The new landing page is a 2D Phaser sidescroller; mobile, low-power, and `prefers-reduced-motion` visitors auto-fall-back to a static page navigated by the same top-right menu.
+
+The rebuild lives on the `rebuild` branch and is in active polish. Production `main` still serves the legacy site; the cutover happens once gameplay and visual polish land — see [`docs/superpowers/IMPLEMENTATION-ROADMAP.md`](./docs/superpowers/IMPLEMENTATION-ROADMAP.md).
 
 ## Stack
 
@@ -9,7 +11,7 @@ Personal site of Kaih White. The landing page is a 2D Phaser sidescroller; mobil
 - **Styling:** SCSS modules.
 - **Animation:** Motion v12 (overlay transitions).
 - **Testing:** Vitest + React Testing Library (unit + behavior), Playwright (full E2E on Chromium; static-pages spec on Firefox / WebKit / iPhone 13 / Pixel 5).
-- **Hosting:** Vercel (auto-deploys `main`).
+- **Hosting:** Vercel; production `main` is the legacy site until the cutover.
 
 ## How it works
 
