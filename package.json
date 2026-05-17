@@ -8,8 +8,10 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test": "vitest run && npm run build --silent && npm run check:bundle",
     "test:watch": "vitest",
+    "check:bundle": "node scripts/check-bundle-size.mjs",
     "e2e": "playwright test",
     "format": "prettier --write ."
   },
