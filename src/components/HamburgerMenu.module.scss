@@ -2,7 +2,8 @@
   position: fixed;
   top: 1rem;
   right: 1rem;
-  z-index: 20;
+  z-index: 102;
+  isolation: isolate;
 }
 
 .toggle {

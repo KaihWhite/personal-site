@@ -214,10 +214,10 @@ test.describe('game-route smoke', () => {
     await expect(page.getByRole('dialog', { name: /contact/i })).toBeVisible({ timeout: 6000 });
 
     // Open the menu (game still paused — menu adds itself as a pause reason).
-    // The overlay backdrop covers the full screen (z-index 100 vs menu z-index 20), so we force
-    // the click to bypass Playwright's pointer-interception check.
-    await page.getByRole('button', { name: /open menu/i }).click({ force: true });
-    await expect(page.getByRole('link', { name: 'Portfolio' })).toBeVisible();
+    // z-index 102 puts the menu button above both the overlay backdrop (100) and close button (101),
+    // so the click goes through normally without force.
+    await page.getByRole('button', { name: /open menu/i }).click();
+    await expect(page.getByRole('link', { name: 'Portfolio', exact: true })).toBeVisible();
 
     // Close the overlay (Escape). Menu still open → pauseCoordinator still has 'menu' reason → game stays paused.
     await page.keyboard.press('Escape');
