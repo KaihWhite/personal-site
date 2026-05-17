@@ -26,6 +26,32 @@ Five polish tracks gating the cutover (to be brainstormed and planned as Phase 5
 
 When polish ships, resume Phase 4 from Task 7 of [`plans/2026-05-17-phase-4-cutover-and-production-deploy.md`](./plans/2026-05-17-phase-4-cutover-and-production-deploy.md). Pre-merge FF safety still holds: `git rev-list --count rebuild..main` was 0 when the plan was written and nothing has landed on `main` since.
 
+### Next-session handoff (2026-05-17)
+
+**Next concrete move:** brainstorm Phase 5 via `superpowers:brainstorming`. Start with **platformer level design** since it shapes the other four tracks (room layouts drive palette needs, level pacing drives content depth, sprite frames drive animation budget, typography is purely cosmetic and can land last). Decide whether Phase 5 is one bundled plan or 5 sub-plans before writing.
+
+**Repo state:** `rebuild` at `13e9fde`; 93 commits ahead of `main`; tree clean; pushed to `origin/rebuild`. Phase 4 work added 7 commits on top of `7fd2fe4` (last Phase 3b commit):
+
+```
+13e9fde docs: reframe rebuild as in-development; defer Phase 4 cutover until polish lands
+9c86200 docs(plans): Phase 4 cutover and production deploy plan
+1c3f153 docs(roadmap): Phase 4 plan ready; mark pending merge       ← partially superseded by 13e9fde
+ed19864 docs(readme): describe shipped site                          ← partially superseded by 13e9fde
+9e05a23 test(e2e): assert mobile viewport hits placeholder landing (auto-opt-out path)
+0c8ebe9 test(e2e): firefox + webkit + iPhone 13 + Pixel 5 projects (static-pages scoped)
+63a5fd7 ci(actions): vitest + build + bundle gate + playwright on PRs to main
+```
+
+**Approval state at handoff:**
+- Pushes to `origin/rebuild` — authorized; already done.
+- FF merge to `main` + push to `origin/main` — **NOT authorized**; user explicitly paused the cutover until polish lands.
+
+**Local validation green at HEAD:** 80 vitest cases, build emits 4 static routes, bundle gate passes (`/` 228.6 KB, static routes 185.9 KB each — all under thresholds), Playwright chromium 13/13 (with retries — Phaser scene-transition tests are flaky in parallel headless mode without retries).
+
+**Two local-dev gotchas to know about:**
+- New `webkit` + `mobile-safari` Playwright projects need `sudo npx playwright install-deps webkit` once on this machine (missing `libavif16` / `libwoff1` / `libevent-2.1-7t64`). `firefox` + `mobile-chrome` work without it. CI runs chromium only so this doesn't affect CI.
+- The CI workflow (`.github/workflows/ci.yml`) only triggers on PRs to `main` or pushes to `main`. Pushes to `rebuild` do NOT run CI. To validate the cutover via CI when ready, open a PR `rebuild` → `main` (e.g. via the GitHub web UI; `gh` CLI isn't installed locally).
+
 ---
 
 ## Phase status
