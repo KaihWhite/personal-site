@@ -300,4 +300,39 @@ test.describe('game-route smoke', () => {
     // Canvas must remain visible after the spike contact (respawn keeps the game running).
     await expect(page.locator('canvas')).toBeVisible();
   });
+
+  test('falling into the first pit respawns the player at the entry doorway', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/');
+    await expect(page.locator('canvas')).toBeVisible({ timeout: 8000 });
+    await page.waitForTimeout(1000);
+    await page.locator('canvas').click({ position: { x: 640, y: 400 } });
+    await page.waitForTimeout(200);
+
+    // Reach PortfolioRoom.
+    await page.keyboard.down('ArrowLeft');
+    await page.waitForTimeout(1550);
+    await page.keyboard.up('ArrowLeft');
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(300);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(1000);
+
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(3200);
+    await page.keyboard.up('ArrowRight');
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(300);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(1000);
+
+    // PortfolioRoom: walk right WITHOUT jumping. Player will fall into pit-1 (x=900..1060)
+    // and trigger checkPitFall once they pass world height + 64.
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(3500); // walk from x=300 to past x=900, fall, fade, respawn
+    await page.keyboard.up('ArrowRight');
+    await page.waitForTimeout(500);
+
+    await expect(page.locator('canvas')).toBeVisible();
+  });
 });
