@@ -11,7 +11,6 @@ const GROUND_HEIGHT = 64;
 const GROUND_FILL = 0x0a0612;
 
 export class CorridorRoom extends RoomScene {
-  private player!: Player;
   private hubDoorway!: Doorway;
   private contentDoorway!: Doorway;
   private contentTargetKey: ContentSceneKey = 'PortfolioRoom';

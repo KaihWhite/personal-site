@@ -11,7 +11,6 @@ const GROUND_HEIGHT = 64;
 const GROUND_FILL = 0x0a0612;
 
 export class PortfolioRoom extends RoomScene {
-  private player!: Player;
   private returnDoorway!: Doorway;
   private viewDoorway!: Doorway;
 
