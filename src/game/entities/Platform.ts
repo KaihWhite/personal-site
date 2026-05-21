@@ -10,6 +10,11 @@ export interface PlatformSpec {
   width: number;
   /** Defaults to 16. */
   height?: number;
+  /**
+   * When true, only the top face triggers collision (left/right/bottom are passable).
+   * Useful for warm-up steps the player can walk under and jump onto.
+   */
+  oneWay?: boolean;
 }
 
 export class Platform extends Phaser.GameObjects.Rectangle {
@@ -18,5 +23,11 @@ export class Platform extends Phaser.GameObjects.Rectangle {
     super(scene, spec.x, spec.y + h / 2, spec.width, h, FILL_COLOR);
     scene.add.existing(this);
     scene.physics.add.existing(this, true);
+    if (spec.oneWay) {
+      const body = this.body as Phaser.Physics.Arcade.StaticBody;
+      body.checkCollision.left = false;
+      body.checkCollision.right = false;
+      body.checkCollision.down = false;
+    }
   }
 }

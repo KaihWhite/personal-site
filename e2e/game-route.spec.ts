@@ -17,6 +17,7 @@ test.describe('game-route smoke', () => {
   // Walk speed: 250 px/s. Hub → portfolio/contact: 384px = ~1536ms.
   // The about doorway is AT the spawn position — player triggers it on interact without walking.
   // CorridorRoom: hub doorway at x=256, content doorway at x=1024 (768px apart = ~3072ms).
+  // Warm-up platforms at x=480 and x=800 are oneWay (top-only collision) — player walks through them.
   // PortfolioRoom/ContactRoom: spawn at 0.5 (x=640), view doorway at 0.75 (x=960), return at 0.25 (x=320).
   // 640 → 960 = 320px = ~1280ms.
   //
@@ -42,6 +43,7 @@ test.describe('game-route smoke', () => {
     await page.waitForTimeout(1000); // scene transition
 
     // Corridor: spawned at hub side (x=256), walk right to content doorway (x=1024, 768px = 3072ms).
+    // Warm-up platforms are oneWay — player passes through their sides at ground level.
     await page.keyboard.down('ArrowRight');
     await page.waitForTimeout(3200);
     await page.keyboard.up('ArrowRight');
@@ -79,6 +81,7 @@ test.describe('game-route smoke', () => {
     await page.waitForTimeout(1000);
 
     // Corridor: spawned at content side (x=1024), walk left to hub doorway (x=256, 768px = 3072ms).
+    // Warm-up platforms are oneWay — player passes through their sides at ground level.
     await page.keyboard.down('ArrowLeft');
     await page.waitForTimeout(3200);
     await page.keyboard.up('ArrowLeft');
@@ -107,6 +110,7 @@ test.describe('game-route smoke', () => {
     await page.waitForTimeout(1000);
 
     // Corridor: spawned at hub side (x=256), walk right to content doorway (x=1024).
+    // Warm-up platforms are oneWay — player passes through their sides at ground level.
     await page.keyboard.down('ArrowRight');
     await page.waitForTimeout(3200);
     await page.keyboard.up('ArrowRight');
@@ -151,6 +155,7 @@ test.describe('game-route smoke', () => {
     await page.waitForTimeout(1000);
 
     // Corridor: spawned at hub side (x=256), walk right to content doorway (x=1024).
+    // Warm-up platforms are oneWay — player passes through their sides at ground level.
     await page.keyboard.down('ArrowRight');
     await page.waitForTimeout(3200);
     await page.keyboard.up('ArrowRight');
@@ -194,6 +199,8 @@ test.describe('game-route smoke', () => {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
+    // Corridor: spawned at hub side (x=256), walk right to content doorway (x=1024).
+    // Warm-up platforms are oneWay — player passes through their sides at ground level.
     await page.keyboard.down('ArrowRight');
     await page.waitForTimeout(3200);
     await page.keyboard.up('ArrowRight');
