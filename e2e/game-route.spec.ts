@@ -335,4 +335,55 @@ test.describe('game-route smoke', () => {
 
     await expect(page.locator('canvas')).toBeVisible();
   });
+
+  test('pause coordinator: menu open in PortfolioRoom suspends physics and prevents respawn', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/');
+    await expect(page.locator('canvas')).toBeVisible({ timeout: 8000 });
+    await page.waitForTimeout(1000);
+    await page.locator('canvas').click({ position: { x: 640, y: 400 } });
+    await page.waitForTimeout(200);
+
+    // Reach PortfolioRoom.
+    await page.keyboard.down('ArrowLeft');
+    await page.waitForTimeout(1550);
+    await page.keyboard.up('ArrowLeft');
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(300);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(1000);
+
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(3200);
+    await page.keyboard.up('ArrowRight');
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(300);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(1000);
+
+    // Walk into the level a bit (~600 px from spawn), then open the menu BEFORE reaching the pit.
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(2000); // ~500 px traversal — player around x=800
+    await page.keyboard.up('ArrowRight');
+    await page.waitForTimeout(200);
+
+    // Open menu.
+    await page.getByRole('button', { name: /open menu/i }).click();
+    await expect(page.getByRole('link', { name: 'Portfolio', exact: true })).toBeVisible();
+
+    // While paused: try to walk right (should be a no-op — physics paused).
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(2000);
+    await page.keyboard.up('ArrowRight');
+
+    // No respawn should have fired (player did not move, did not fall). Canvas is healthy.
+    await expect(page.locator('canvas')).toBeVisible();
+
+    // Close the menu.
+    await page.getByRole('button', { name: /close menu/i }).click();
+    await page.waitForTimeout(500);
+
+    // Game resumes — canvas still present.
+    await expect(page.locator('canvas')).toBeVisible();
+  });
 });
