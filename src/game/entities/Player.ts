@@ -62,6 +62,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   override update(): void {
+    // Suspend input + animation reads when the scene is respawning the player.
+    // Scenes that extend RoomScene set `respawning = true` during the fade-out → teleport → fade-in flow.
+    const sceneRespawning = (this.scene as unknown as { respawning?: boolean }).respawning === true;
+    if (sceneRespawning) return;
+
     const body = this.body as Phaser.Physics.Arcade.Body;
     const left = this.keys.left.isDown || this.keys.altLeft.isDown;
     const right = this.keys.right.isDown || this.keys.altRight.isDown;
