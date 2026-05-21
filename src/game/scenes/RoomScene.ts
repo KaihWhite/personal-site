@@ -87,10 +87,30 @@ export abstract class RoomScene extends Phaser.Scene {
   /**
    * Respawn the player at this scene's respawnAnchor. Idempotent during an in-flight respawn.
    * No-op if no anchor is set (HubRoom / CorridorRoom never call this).
-   * Implementation lands in Task 8.
    */
+  protected respawning = false;
+
   protected respawnPlayer(): void {
-    // Placeholder — Task 8 fills this in.
+    if (this.respawning || !this.respawnAnchor) return;
+    this.respawning = true;
+    const player = this.player;
+    const body = player.body as Phaser.Physics.Arcade.Body;
+    body.setVelocity(0, 0);
+    body.allowGravity = false;
+    player.setTint(0xff4040);
+    this.cameras.main.fadeOut(180, 0, 0, 0);
+    this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+      const anchor = this.respawnAnchor!;
+      player.setPosition(anchor.x, anchor.y);
+      player.setFacing(anchor.facing);
+      body.setVelocity(0, 0);
+      body.allowGravity = true;
+      player.clearTint();
+      this.cameras.main.fadeIn(180, 0, 0, 0);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_IN_COMPLETE, () => {
+        this.respawning = false;
+      });
+    });
   }
 
   /**
