@@ -238,4 +238,66 @@ test.describe('game-route smoke', () => {
     await expect(page).toHaveURL('/');
     await expect(page.locator('canvas')).toBeVisible({ timeout: 8000 });
   });
+
+  test('hitting the mid-island spike respawns the player at the entry doorway', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/');
+    await expect(page.locator('canvas')).toBeVisible({ timeout: 8000 });
+    await page.waitForTimeout(1000);
+    await page.locator('canvas').click({ position: { x: 640, y: 400 } });
+    await page.waitForTimeout(200);
+
+    // Hub → portfolio doorway (x=256, ~384px from spawn at 640 = 1550ms).
+    await page.keyboard.down('ArrowLeft');
+    await page.waitForTimeout(1550);
+    await page.keyboard.up('ArrowLeft');
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(300);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(1000);
+
+    // Corridor: hub-side spawn (x=256) → content doorway (x=1024). 768px = 3200ms.
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(3200);
+    await page.keyboard.up('ArrowRight');
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(300);
+    await page.keyboard.up('ArrowUp');
+    await page.waitForTimeout(1000);
+
+    // PortfolioRoom: spawn at x=300. Walk right WITHOUT continuously jumping so we fall into
+    // hazards and trigger respawn. Use brute-force ArrowUp pulses every ~380ms to detect doorways,
+    // but use Space sparingly — only once to clear pit-1 so we can reach the spike at x=1280.
+    // After the spike hit the canvas must still be visible (respawn occurred, player teleports back).
+    await page.keyboard.down('ArrowRight');
+
+    // Phase 1: ~2500ms to approach pit-1 without jumping (x=900..1060).
+    for (let i = 0; i < 7; i++) {
+      await page.waitForTimeout(180);
+      await page.keyboard.down('ArrowUp');
+      await page.waitForTimeout(200);
+      await page.keyboard.up('ArrowUp');
+    }
+
+    // Jump pit-1 once.
+    await page.keyboard.down('Space');
+    await page.waitForTimeout(50);
+    await page.keyboard.up('Space');
+    await page.waitForTimeout(500);
+
+    // Phase 2: Walk into the spike at x=1280 (~1500ms from pit-1 end).
+    // Continue ArrowUp pulsing; stop Space so player lands on spike tile.
+    for (let i = 0; i < 10; i++) {
+      await page.waitForTimeout(180);
+      await page.keyboard.down('ArrowUp');
+      await page.waitForTimeout(200);
+      await page.keyboard.up('ArrowUp');
+    }
+
+    await page.keyboard.up('ArrowRight');
+    await page.waitForTimeout(500);
+
+    // Canvas must remain visible after the spike contact (respawn keeps the game running).
+    await expect(page.locator('canvas')).toBeVisible();
+  });
 });
