@@ -1,6 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('game-route smoke', () => {
+  // Game-route tests run sequentially: each spins up a full Phaser canvas + WebGL
+  // context, and the heavy multi-screen traversal tests (52s each) compete for
+  // CPU/GPU resources when run in parallel — dialog detection times out under load.
+  // The static-pages spec stays fully parallel; only this describe block serializes.
+  test.describe.configure({ mode: 'serial' });
+
   test('home mounts the game canvas and the skeleton fades out', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('canvas')).toBeVisible({ timeout: 8000 });
