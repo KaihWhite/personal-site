@@ -1,14 +1,11 @@
 import Phaser from 'phaser';
 import { gameBridge } from '@/game/bridge';
-import { Player } from '@/game/entities/Player';
 import { Doorway } from '@/game/entities/Doorway';
 import roomBgGlsl from '@/game/shaders/room-bg.glsl';
 import { PORTFOLIO_PALETTE } from '@/game/shaders/roomPalettes';
 import { RoomScene } from './RoomScene';
 import { SCENE_TRANSITION_MS } from './corridorSpawn';
-
-const GROUND_HEIGHT = 64;
-const GROUND_FILL = 0x0a0612;
+import { portfolioLevel } from '@/game/levels/portfolioLevel';
 
 export class PortfolioRoom extends RoomScene {
   private returnDoorway!: Doorway;
@@ -29,38 +26,22 @@ export class PortfolioRoom extends RoomScene {
       uWaveAmplitude: { type: '1f', value: PORTFOLIO_PALETTE.waveAmplitude },
       uGrainStrength: { type: '1f', value: PORTFOLIO_PALETTE.grainStrength },
     });
-    const bg = this.add.shader(baseShader, width / 2, height / 2, width, height);
+    // Background sized to the world (2x viewport), centered.
+    const bg = this.add.shader(baseShader, (portfolioLevel.worldWidth ?? width) / 2, height / 2, portfolioLevel.worldWidth ?? width, height);
     bg.setDepth(-100);
 
-    const ground = this.add.rectangle(width / 2, height - GROUND_HEIGHT / 2, width, GROUND_HEIGHT, GROUND_FILL);
-    this.physics.add.existing(ground, true);
-
-    // Player spawns at center, facing right (toward viewing doorway).
-    this.player = new Player(this, width * 0.5, height - GROUND_HEIGHT);
-    this.player.setFacing('right');
-    this.physics.add.collider(this.player, ground);
-
-    this.returnDoorway = new Doorway(this, width * 0.25, height - GROUND_HEIGHT, {
-      id: 'portfolio-return',
-      label: '↑ return to hub',
-    });
-    this.viewDoorway = new Doorway(this, width * 0.75, height - GROUND_HEIGHT, {
-      id: 'portfolio-view',
-      label: '↑ view portfolio',
-    });
-
-    this.cameras.main.startFollow(this.player, true, 0.2, 0.2);
-    this.cameras.main.setBounds(0, 0, width, height);
-    this.physics.world.setBounds(0, 0, width, height);
+    const { doorways } = this.buildLevel(portfolioLevel);
+    this.returnDoorway = doorways[0]!;
+    this.viewDoorway = doorways[1]!;
 
     this.wireBridge();
-
     gameBridge.emit('game:scene-changed', { room: 'PortfolioRoom' });
   }
 
   override update(): void {
     if (this.paused) return;
     this.player.update();
+    this.checkPitFall(this.player.y);
 
     const playerBounds = this.player.getBounds();
     const inReturn = Phaser.Geom.Rectangle.Overlaps(playerBounds, this.returnDoorway.getBounds());
