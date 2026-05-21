@@ -118,8 +118,11 @@ export abstract class RoomScene extends Phaser.Scene {
    * Subclasses call this from update() after `player.update()`.
    * Implementation lands in Task 9.
    */
-  protected checkPitFall(_playerY: number): void {
-    // Placeholder — Task 9 fills this in.
+  protected checkPitFall(playerY: number): void {
+    if (this.respawning || this.paused) return;
+    if (playerY > this.scale.height + 64) {
+      this.respawnPlayer();
+    }
   }
 
   private handlePause(): void {
