@@ -1,10 +1,9 @@
 import type { LevelData } from './types';
+import { DESIGN_W, DESIGN_H } from './resolveLayout';
 
-const VIEWPORT_W = 1280;
-const VIEWPORT_H = 800;
 const GROUND_HEIGHT = 64;
-const GROUND_TOP = VIEWPORT_H - GROUND_HEIGHT;
-const WORLD_W = VIEWPORT_W * 2;
+const GROUND_TOP = DESIGN_H - GROUND_HEIGHT;
+const WORLD_W = DESIGN_W * 2;
 
 // Ground layout mirrors portfolioLevel (pits narrowed to 100 px):
 //   Seg-1: x=0..930, Pit-1: x=930..1030, Seg-2: x=1030..1500,

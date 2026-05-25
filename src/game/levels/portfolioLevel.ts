@@ -1,10 +1,9 @@
 import type { LevelData } from './types';
+import { DESIGN_W, DESIGN_H } from './resolveLayout';
 
-const VIEWPORT_W = 1280;
-const VIEWPORT_H = 800;
 const GROUND_HEIGHT = 64;
-const GROUND_TOP = VIEWPORT_H - GROUND_HEIGHT; // 736
-const WORLD_W = VIEWPORT_W * 2;                // 2560
+const GROUND_TOP = DESIGN_H - GROUND_HEIGHT; // 736
+const WORLD_W = DESIGN_W * 2;                // 2560
 
 // Ground segment layout (pits narrowed to 100 px for reliable jump clearance):
 //   Seg-1: x=0..930   (center=465, width=930)

@@ -1,12 +1,11 @@
 import type { LevelData } from './types';
 import type { PanelData } from '@/game/entities/Panel';
 import { ABOUT_PANELS } from '@/game/content/panels';
+import { DESIGN_W, DESIGN_H } from './resolveLayout';
 
-const VIEWPORT_W = 1280;
-const VIEWPORT_H = 800;
 const GROUND_HEIGHT = 64;
-const GROUND_TOP = VIEWPORT_H - GROUND_HEIGHT;
-const WORLD_W = VIEWPORT_W * 2;
+const GROUND_TOP = DESIGN_H - GROUND_HEIGHT;
+const WORLD_W = DESIGN_W * 2;
 
 export const aboutLevel: LevelData = {
   worldWidth: WORLD_W,
