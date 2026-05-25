@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { XAnchor } from '@/game/levels/types';
 
 const FILL_COLOR = 0x0a0612;
 
@@ -15,6 +16,8 @@ export interface PlatformSpec {
    * Useful for warm-up steps the player can walk under and jump onto.
    */
   oneWay?: boolean;
+  /** How center x maps to the viewport (default 'world'). */
+  xAnchor?: XAnchor;
 }
 
 export class Platform extends Phaser.GameObjects.Rectangle {

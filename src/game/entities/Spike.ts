@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { XAnchor } from '@/game/levels/types';
 
 const FILL_COLOR = 0x6a1a1a;
 const DEFAULT_W = 24;
@@ -13,6 +14,8 @@ export interface SpikeSpec {
   width?: number;
   /** Defaults to 16. */
   height?: number;
+  /** How center x maps to the viewport (default 'world'). */
+  xAnchor?: XAnchor;
 }
 
 export class Spike extends Phaser.GameObjects.Polygon {
