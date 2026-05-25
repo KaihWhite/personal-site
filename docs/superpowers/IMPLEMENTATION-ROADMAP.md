@@ -14,7 +14,35 @@
 
 ## Where to start (next concrete move)
 
-**Phase 5a shipped — Phase 5b polish next.** Phase 5a turned the navigation-skeleton rooms into actual platformer levels: multi-screen content rooms with pits + static spikes, doorway-anchored respawn, light platforming in Hub + Corridor, About panels distributed across the wider world. Phase 4 cutover still waits for Phase 5b polish (sprite art, room visuals, content depth, typography).
+### Next-session handoff (2026-05-24) — responsive-levels fix IN FLIGHT
+
+**A standalone "responsive levels" fix is mid-execution and takes precedence over Phase 5b.** It makes the Phaser world fill the browser window at any size (root cause: the game is authored at a fixed 1280×800 design space but `config.ts` uses `Scale.RESIZE` against the live window, so on larger windows the camera revealed empty world below/right of the hand-placed content). We kept `Scale.RESIZE` and made the level layout viewport-relative.
+
+- **Spec:** [`specs/2026-05-24-responsive-levels-design.md`](./specs/2026-05-24-responsive-levels-design.md)
+- **Plan (9 tasks, TDD):** [`plans/2026-05-24-responsive-levels.md`](./plans/2026-05-24-responsive-levels.md) — executing via subagent-driven-development.
+
+**Progress: Tasks 1–5 of 9 done and committed to `rebuild` (commits `ebc1dc2`..`e3e9093`). `rebuild` is 9 commits ahead of `origin/rebuild` — NOT pushed.** Tasks 6–9 remain.
+
+- **Done:** ① `XAnchor` spec field; ② `resolveLayout()` pure resolver (`src/game/levels/resolveLayout.ts`) — maps fixed 1280×800 coords to the live viewport via per-element x-anchor modes (`frac`/`center`/`world`) + a uniform bottom-anchor y-shift; identity at 1280×800; ③ Hub/Corridor tagged + content levels share `DESIGN_W/DESIGN_H`; ④ level-invariants test parametrized over 4 viewports (244 cases); ⑤ `RoomScene.buildLevel(data, palette)` now resolves layout + owns the background shader (lifted out of all 5 scenes).
+- **Next — resume at Task 6:** ⑥ `Platform.applySpec`/`Spike.applySpec` reposition methods (TDD); ⑦ `RoomScene` RESIZE handler + `onRelayout` hook (re-resolve + reposition entities/shader/bounds/player on window resize, TDD); ⑧ re-anchor Hub "KW" signage + About panels in `onRelayout` (currently still placed at literal coords); ⑨ verify at 1920×1080 + a window resize (screenshot, no gap), then full `npm test` + e2e gate. The plan has exact code for each.
+
+**Task 5 deviated from the plan (all intentional, verified):**
+- Found the chromium E2E was silently running at **1280×720** (the `Desktop Chrome` device preset overrode the global 800), so `resolveLayout` was NOT the identity there. Pinned the chromium project to **1280×800** in `playwright.config.ts` (design height = canonical).
+- Added a **vitest `.glsl` raw-import plugin** (`vitest.config.ts`) — `RoomScene` now imports `room-bg.glsl`, and the RoomScene unit tests transitively need it.
+- **Dropped 3 flaky content-overlay E2E tests** (portfolio-overlay, contact-overlay, pause-on-overlay-close). They required clearing two 100px pits + a spike via blind timed jumps to reach the x=2400 view doorway — unavoidably flaky without player-position feedback (a position-based test hook was offered and declined; continuous bunny-hopping lands in a pit deterministically). Overlay open/route/Escape stay covered by `OverlayRouter`/`PortfolioOverlay`/`ContactOverlay` component tests; content-room entry + hazards + respawn + pause stay covered by the spike-respawn, pit-fall, and pause-in-PortfolioRoom E2E tests.
+
+**Gate state at handoff:** unit 351/351 + invariants 244/244 green; chromium game-route E2E 7/7 stable (~55s, verified across repeated runs); build + bundle green. `config.ts` stays `Scale.RESIZE` (unchanged).
+
+**Approval state:** pushes of the 9 `rebuild` commits to `origin/rebuild` — NOT yet done (awaiting the user). FF merge to `main` / deploy — still gated (unchanged).
+
+**Pitfalls discovered (worth knowing for Tasks 6–9):**
+- Blind-timed platformer traversal in Playwright is fundamentally flaky under SwiftShader; don't reintroduce pit-crossing into E2E without a position hook.
+- `resolveLayout` is the IDENTITY at exactly 1280×800 — that property is what keeps the remaining E2E green; preserve it.
+- `RoomScene.buildLevel`'s `physics.world.setBounds(...)` must stay in its **4-arg form** (the pit-fall mechanism relies on the resulting bounds-collision behavior; don't add the optional check args).
+
+---
+
+**Phase 5a shipped — Phase 5b polish next (AFTER responsive-levels lands).** Phase 5a turned the navigation-skeleton rooms into actual platformer levels: multi-screen content rooms with pits + static spikes, doorway-anchored respawn, light platforming in Hub + Corridor, About panels distributed across the wider world. Phase 4 cutover still waits for Phase 5b polish (sprite art, room visuals, content depth, typography).
 
 Four polish tracks gating the cutover (to be brainstormed and planned as Phase 5b):
 

@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Execution status (2026-05-24):** Tasks **1–5 DONE** and committed to `rebuild` (commits `ebc1dc2`..`e3e9093`). **Resume at Task 6.** Task 5 deviated intentionally: pinned chromium E2E to 1280×800 (the `Desktop Chrome` preset was overriding it to 720), added a vitest `.glsl` plugin, and dropped the 3 flaky content-overlay traversal tests (a position hook was declined; overlay wiring is covered by component tests). See the roadmap's "Next-session handoff (2026-05-24)" for full context. Gate at handoff: 351 unit + 244 invariants + 7 e2e all green.
+
 **Goal:** Make the Phaser game world fill the browser window at any size by laying each level out relative to the live viewport, instead of the fixed 1280×800 authored coordinates that currently leave an empty gap on large windows.
 
 **Architecture:** Levels keep authoring in 1280×800 design-space pixels. A new pure function `resolveLayout(data, viewport)` maps each element to the live viewport via per-element x-anchor modes (`frac`/`center`/`world`) plus a uniform bottom-anchor vertical shift, and clamps/extends the world to cover the viewport. `RoomScene.buildLevel` resolves once at scene-create and re-resolves on Phaser's `RESIZE` event, repositioning entities in place. Config stays `Scale.RESIZE`. At exactly 1280×800 the resolver is the identity, so the existing test suite stays green.
