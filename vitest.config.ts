@@ -1,9 +1,22 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig, type Plugin } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'node:path';
+import fs from 'node:fs';
+
+/** Transform *.glsl imports into ES modules that export the raw source string. */
+function glslPlugin(): Plugin {
+  return {
+    name: 'vitest-glsl',
+    transform(_, id) {
+      if (!id.endsWith('.glsl')) return;
+      const source = fs.readFileSync(id, 'utf-8');
+      return { code: `export default ${JSON.stringify(source)};`, map: null };
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), glslPlugin()],
   test: {
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],

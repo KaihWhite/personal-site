@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { gameBridge } from '@/game/bridge';
 import { Doorway } from '@/game/entities/Doorway';
-import roomBgGlsl from '@/game/shaders/room-bg.glsl';
 import { PORTFOLIO_PALETTE } from '@/game/shaders/roomPalettes';
 import { RoomScene } from './RoomScene';
 import { SCENE_TRANSITION_MS } from './corridorSpawn';
@@ -16,21 +15,7 @@ export class PortfolioRoom extends RoomScene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
-
-    const baseShader = new Phaser.Display.BaseShader('room-bg', roomBgGlsl, undefined, {
-      uColorDeep:     { type: '3f', value: PORTFOLIO_PALETTE.deep },
-      uColorMid:      { type: '3f', value: PORTFOLIO_PALETTE.mid },
-      uColorAccent:   { type: '3f', value: PORTFOLIO_PALETTE.accent },
-      uWaveSpeed:     { type: '1f', value: PORTFOLIO_PALETTE.waveSpeed },
-      uWaveAmplitude: { type: '1f', value: PORTFOLIO_PALETTE.waveAmplitude },
-      uGrainStrength: { type: '1f', value: PORTFOLIO_PALETTE.grainStrength },
-    });
-    // Background sized to the world (2x viewport), centered.
-    const bg = this.add.shader(baseShader, (portfolioLevel.worldWidth ?? width) / 2, height / 2, portfolioLevel.worldWidth ?? width, height);
-    bg.setDepth(-100);
-
-    const { doorways } = this.buildLevel(portfolioLevel);
+    const { doorways } = this.buildLevel(portfolioLevel, PORTFOLIO_PALETTE);
     this.returnDoorway = doorways[0]!;
     this.viewDoorway = doorways[1]!;
 

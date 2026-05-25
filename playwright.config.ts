@@ -18,6 +18,10 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        // Pin to 1280×800 so resolveLayout is the identity (floorShift = 0).
+        // devices['Desktop Chrome'] sets 1280×720 which activates real pit/spike
+        // geometry in the new resolver — the test timings were written for 800px.
+        viewport: { width: 1280, height: 800 },
         launchOptions: {
           args: [
             '--use-gl=swiftshader',

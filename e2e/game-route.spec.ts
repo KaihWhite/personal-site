@@ -22,7 +22,7 @@ test.describe('game-route smoke', () => {
   // contact at 0.80 (x=1024). Doorways are 64px wide. Player body is 32px wide.
   // Walk speed: 250 px/s. Hub → portfolio/contact: 384px = ~1550ms.
   // The about doorway is AT the spawn position — player triggers it on interact without walking.
-  // CorridorRoom: hub doorway at x=256, content doorway at x=1024 (768px apart = ~3200ms).
+  // CorridorRoom: hub doorway at x=256, content doorway at x=1024 (768px apart = ~3000ms).
   // Warm-up platforms at x=480 and x=800 are oneWay (top-only collision) — player walks through them.
   // PortfolioRoom/ContactRoom (Phase 5a): spawn at x=300, view doorway at x=2400, return at x=200.
   // 2-screen content rooms with pits and spikes — use Space-pulse jumps during traversal.
@@ -48,10 +48,10 @@ test.describe('game-route smoke', () => {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // Corridor: hub-side spawn (x=256) → content doorway (x=1024). 768px = 3200ms.
+    // Corridor: hub-side spawn (x=256) → content doorway (x=1024). Walk 3000ms (~750px).
     // Two warm-up platforms en route — player just walks under/over them.
     await page.keyboard.down('ArrowRight');
-    await page.waitForTimeout(3200);
+    await page.waitForTimeout(3000);
     await page.keyboard.up('ArrowRight');
     await page.waitForTimeout(150);
     await page.keyboard.down('ArrowUp');
@@ -61,36 +61,34 @@ test.describe('game-route smoke', () => {
 
     // PortfolioRoom: spawn at x=300, view doorway at x=2400, return doorway at x=200.
     // Platforms (oneWay): x=825 (y=692, width=150), x=2200 (y=648, width=200).
-    // Hazards (pits narrowed to 100px): pit-1 (x=930..1030), spike (x=1280), pit-2 (x=1500..1600).
+    // Hazards: pit-1 (x=930..1030), spike (x=1280), pit-2 (x=1500..1600).
     //
-    // Strategy: hold ArrowRight; platforms are oneWay so player walks through them.
-    // Fire jumps at the pit/spike edges (calculated from 250 px/s walk speed from x=300):
-    //   Pit-1 edge x=930  → t≈2520 ms (launch at t=2400 ms for 120ms safety margin)
-    //   Spike  x=1280     → t≈3920 ms (launch at t=3850 ms)
-    //   Pit-2 edge x=1500 → t≈4800 ms (launch at t=4750 ms)
-    //   View doorway x=2400 → arrive at t≈8400 ms; pulse ArrowUp to open overlay.
-    // If a respawn occurs, the fallback pulse loop (ArrowUp every ~380ms, Space every ~760ms)
-    // covers additional time. Total budget: 3 scripted jumps (~8.4s) + 20s pulse tail = ~30s.
-    // PortfolioRoom traversal: hold ArrowRight + pulse ArrowUp every ~380ms throughout.
-    // ArrowUp only triggers when the player is in a doorway zone (isInteractPressed).
-    // Jump at specific offsets to clear the 3 hazards (250px/s, 183px jump range):
-    //   i=6  (t≈2280ms, x≈870):  jump for pit-1 (x=930..1030, 100px) — lands x≈1053
-    //   i=9  (t≈3470ms, x≈1167): jump for spike (x=1268..1292) — clears it airborne
-    //   i=12 (t≈4660ms, x≈1465): jump for pit-2 (x=1500..1600, 100px) — lands x≈1648
-    // After i=12, also pulse Space every 6th iteration for respawn-recovery coverage.
-    // Player reaches view doorway (x=2400) at i≈21. Loop runs 100 iterations (~40s budget).
+    // Strategy: hold ArrowRight + pulse ArrowUp every iteration for doorway detection.
+    // Use wall-clock time windows to fire Space jumps regardless of iteration overhead:
+    //   t∈[2200,2800]ms: jump window for pit-1 (player near x=930 at 250px/s from x=300)
+    //   t∈[3600,4200]ms: jump window for spike (x≈1280 adjusted for pit-1 jump arc)
+    //   t∈[4600,5200]ms: jump window for pit-2 (x≈1500 adjusted for prior jumps)
+    //   t>6000ms every 2000ms: recovery window in case of respawn
+    // Iterations run at ~200ms each (ArrowUp hold 100ms + 50ms gap = ~200ms).
+    // View doorway (x=2400) reached at ~8400ms from room entry; ArrowUp every 200ms
+    // guarantees at least one press lands within the 384ms doorway window.
     await page.keyboard.down('ArrowRight');
     let portfolioOpened = false;
-    for (let i = 0; i < 100 && !portfolioOpened; i++) {
-      const isScriptedJump = i === 6 || i === 9 || i === 12;
-      const isRecoveryJump = i > 12 && i % 6 === 0;
-      if (isScriptedJump || isRecoveryJump) {
+    const roomEntryMs = Date.now();
+    for (let i = 0; i < 300 && !portfolioOpened; i++) {
+      const elapsed = Date.now() - roomEntryMs;
+      const inJumpWindow =
+        (elapsed > 2200 && elapsed < 2800) ||
+        (elapsed > 3600 && elapsed < 4200) ||
+        (elapsed > 4600 && elapsed < 5200) ||
+        (elapsed > 6000 && (elapsed % 2000) < 800);
+      if (inJumpWindow) {
         await page.keyboard.down('Space'); await page.waitForTimeout(50); await page.keyboard.up('Space');
       }
-      await page.waitForTimeout(180);
       await page.keyboard.down('ArrowUp');
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(100);
       await page.keyboard.up('ArrowUp');
+      await page.waitForTimeout(50);
       portfolioOpened = await page.getByRole('dialog', { name: /portfolio/i }).isVisible().catch(() => false);
     }
     await page.keyboard.up('ArrowRight');
@@ -116,9 +114,9 @@ test.describe('game-route smoke', () => {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // Corridor: hub-side spawn (x=256) → content doorway (x=1024). 768px = 3200ms.
+    // Corridor: hub-side spawn (x=256) → content doorway (x=1024). Walk 3000ms (~750px).
     await page.keyboard.down('ArrowRight');
-    await page.waitForTimeout(3200);
+    await page.waitForTimeout(3000);
     await page.keyboard.up('ArrowRight');
     await page.keyboard.down('ArrowUp');
     await page.waitForTimeout(300);
@@ -154,28 +152,38 @@ test.describe('game-route smoke', () => {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // Corridor: hub-side spawn (x=256) → content doorway (x=1024). 768px = 3200ms.
+    // Corridor: hub-side spawn (x=256) → content doorway (x=1024). Walk 3000ms (~750px).
     await page.keyboard.down('ArrowRight');
-    await page.waitForTimeout(3200);
+    await page.waitForTimeout(3000);
     await page.keyboard.up('ArrowRight');
     await page.keyboard.down('ArrowUp');
     await page.waitForTimeout(300);
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // ContactRoom: same layout and traversal pattern as PortfolioRoom.
+    // ContactRoom: same layout as PortfolioRoom. Use wall-clock time windows for Space jumps
+    // so jump fires regardless of Playwright iteration overhead (~200ms per loop).
+    //   t∈[2200,2800]ms: jump window for pit-1
+    //   t∈[3600,4200]ms: jump window for spike
+    //   t∈[4600,5200]ms: jump window for pit-2
+    //   t>6000ms every 2000ms: recovery window in case of respawn
     await page.keyboard.down('ArrowRight');
     let contactOpened = false;
-    for (let i = 0; i < 100 && !contactOpened; i++) {
-      const isScriptedJump = i === 6 || i === 9 || i === 12;
-      const isRecoveryJump = i > 12 && i % 6 === 0;
-      if (isScriptedJump || isRecoveryJump) {
+    const contactEntryMs = Date.now();
+    for (let i = 0; i < 300 && !contactOpened; i++) {
+      const elapsed = Date.now() - contactEntryMs;
+      const inJumpWindow =
+        (elapsed > 2200 && elapsed < 2800) ||
+        (elapsed > 3600 && elapsed < 4200) ||
+        (elapsed > 4600 && elapsed < 5200) ||
+        (elapsed > 6000 && (elapsed % 2000) < 800);
+      if (inJumpWindow) {
         await page.keyboard.down('Space'); await page.waitForTimeout(50); await page.keyboard.up('Space');
       }
-      await page.waitForTimeout(180);
       await page.keyboard.down('ArrowUp');
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(100);
       await page.keyboard.up('ArrowUp');
+      await page.waitForTimeout(50);
       contactOpened = await page.getByRole('dialog', { name: /contact/i }).isVisible().catch(() => false);
     }
     await page.keyboard.up('ArrowRight');
@@ -205,26 +213,31 @@ test.describe('game-route smoke', () => {
     await page.waitForTimeout(1000);
 
     await page.keyboard.down('ArrowRight');
-    await page.waitForTimeout(3200);
+    await page.waitForTimeout(3000);
     await page.keyboard.up('ArrowRight');
     await page.keyboard.down('ArrowUp');
     await page.waitForTimeout(300);
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // ContactRoom: same layout and traversal pattern as PortfolioRoom.
+    // ContactRoom: same layout as PortfolioRoom. Use wall-clock time windows for Space jumps.
     await page.keyboard.down('ArrowRight');
     let openedPause = false;
-    for (let i = 0; i < 100 && !openedPause; i++) {
-      const isScriptedJump = i === 6 || i === 9 || i === 12;
-      const isRecoveryJump = i > 12 && i % 6 === 0;
-      if (isScriptedJump || isRecoveryJump) {
+    const pauseEntryMs = Date.now();
+    for (let i = 0; i < 300 && !openedPause; i++) {
+      const elapsed = Date.now() - pauseEntryMs;
+      const inJumpWindow =
+        (elapsed > 2200 && elapsed < 2800) ||
+        (elapsed > 3600 && elapsed < 4200) ||
+        (elapsed > 4600 && elapsed < 5200) ||
+        (elapsed > 6000 && (elapsed % 2000) < 800);
+      if (inJumpWindow) {
         await page.keyboard.down('Space'); await page.waitForTimeout(50); await page.keyboard.up('Space');
       }
-      await page.waitForTimeout(180);
       await page.keyboard.down('ArrowUp');
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(100);
       await page.keyboard.up('ArrowUp');
+      await page.waitForTimeout(50);
       openedPause = await page.getByRole('dialog', { name: /contact/i }).isVisible().catch(() => false);
     }
     await page.keyboard.up('ArrowRight');
@@ -279,9 +292,9 @@ test.describe('game-route smoke', () => {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // Corridor: hub-side spawn (x=256) → content doorway (x=1024). 768px = 3200ms.
+    // Corridor: hub-side spawn (x=256) → content doorway (x=1024). Walk 3000ms (~750px).
     await page.keyboard.down('ArrowRight');
-    await page.waitForTimeout(3200);
+    await page.waitForTimeout(3000);
     await page.keyboard.up('ArrowRight');
     await page.keyboard.down('ArrowUp');
     await page.waitForTimeout(300);
@@ -293,9 +306,9 @@ test.describe('game-route smoke', () => {
     // Canvas must remain visible after the spike contact.
     await page.keyboard.down('ArrowRight');
 
-    // Phase 1: ~2280ms (6 ArrowUp iterations × 380ms) to approach pit-1 edge at x=930.
-    // Player at x=870 (before new pit-1 edge at x=930); then jump to clear it.
-    for (let i = 0; i < 6; i++) {
+    // Phase 1: ~2268ms (4 ArrowUp iterations × 567ms) to approach pit-1 edge at x=930.
+    // Player at x=867 (before new pit-1 edge at x=930); then jump to clear it.
+    for (let i = 0; i < 4; i++) {
       await page.waitForTimeout(180);
       await page.keyboard.down('ArrowUp');
       await page.waitForTimeout(200);
@@ -342,7 +355,7 @@ test.describe('game-route smoke', () => {
     await page.waitForTimeout(1000);
 
     await page.keyboard.down('ArrowRight');
-    await page.waitForTimeout(3200);
+    await page.waitForTimeout(3000);
     await page.keyboard.up('ArrowRight');
     await page.keyboard.down('ArrowUp');
     await page.waitForTimeout(300);
@@ -377,7 +390,7 @@ test.describe('game-route smoke', () => {
     await page.waitForTimeout(1000);
 
     await page.keyboard.down('ArrowRight');
-    await page.waitForTimeout(3200);
+    await page.waitForTimeout(3000);
     await page.keyboard.up('ArrowRight');
     await page.keyboard.down('ArrowUp');
     await page.waitForTimeout(300);

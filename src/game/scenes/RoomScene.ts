@@ -7,6 +7,9 @@ import { Platform } from '@/game/entities/Platform';
 import { Spike } from '@/game/entities/Spike';
 import { Doorway } from '@/game/entities/Doorway';
 import type { LevelData, SpawnSpec } from '@/game/levels/types';
+import roomBgGlsl from '@/game/shaders/room-bg.glsl';
+import type { RoomPalette } from '@/game/shaders/roomPalettes';
+import { resolveLayout } from '@/game/levels/resolveLayout';
 
 export interface BuildLevelResult {
   player: Player;
@@ -22,12 +25,20 @@ export interface BuildLevelResult {
  *   - this.paused flag (subclass update() should `if (this.paused) return;` early)
  *   - cross-scene pause persistence — on create, if pauseCoordinator says we're paused,
  *     the new scene starts with physics paused and `this.paused = true`.
- *   - buildLevel(data) — constructs ground/platforms/spikes/doorways/Player from level data.
+ *   - buildLevel(data, palette) — resolves layout for the current viewport, builds the
+ *     background shader, ground/platforms/spikes/doorways/Player from resolved coordinates.
  */
 export abstract class RoomScene extends Phaser.Scene {
   protected paused = false;
   protected player!: Player;
   protected respawnAnchor: SpawnSpec | null = null;
+  private bg!: Phaser.GameObjects.Shader;
+  private grounds: Platform[] = [];
+  private platforms: Platform[] = [];
+  private spikes: Spike[] = [];
+  private doorways: Doorway[] = [];
+  private levelData!: LevelData;
+  private viewportH = 0;
   private offPause: (() => void) | undefined;
   private offResume: (() => void) | undefined;
 
@@ -45,41 +56,62 @@ export abstract class RoomScene extends Phaser.Scene {
   }
 
   /**
-   * Constructs the level's ground, platforms, spikes, doorways, and Player from LevelData.
-   * Wires player ↔ surfaces collider and player ↔ spikes overlap (overlap triggers respawnPlayer).
-   * Sets world + camera bounds; enables a horizontal deadzone when the world is wider than viewport.
-   * Stores `this.player` and `this.respawnAnchor` for use by respawnPlayer/checkPitFall.
+   * Resolves the level for the current viewport, builds the background shader, ground,
+   * platforms, spikes, doorways, and Player, wires colliders, and sets world + camera bounds.
+   * Stores references + the un-resolved LevelData so the RESIZE handler can re-flow the layout.
    */
-  protected buildLevel(data: LevelData): BuildLevelResult {
-    const VIEWPORT_W = this.scale.width;
-    const VIEWPORT_H = this.scale.height;
-    const WORLD_W = data.worldWidth ?? VIEWPORT_W;
-    const WORLD_H = VIEWPORT_H;
+  protected buildLevel(data: LevelData, palette: RoomPalette): BuildLevelResult {
+    this.levelData = data;
+    const vp = { width: this.scale.width, height: this.scale.height };
+    const resolved = resolveLayout(data, vp);
+    this.viewportH = vp.height;
 
-    const grounds = data.ground.map((spec) => new Platform(this, spec));
-    const platforms = data.platforms.map((spec) => new Platform(this, spec));
-    const spikes = data.spikes.map((spec) => new Spike(this, spec));
-    const doorways = data.doorways.map(
+    const baseShader = new Phaser.Display.BaseShader('room-bg', roomBgGlsl, undefined, {
+      uColorDeep:     { type: '3f', value: palette.deep },
+      uColorMid:      { type: '3f', value: palette.mid },
+      uColorAccent:   { type: '3f', value: palette.accent },
+      uWaveSpeed:     { type: '1f', value: palette.waveSpeed },
+      uWaveAmplitude: { type: '1f', value: palette.waveAmplitude },
+      uGrainStrength: { type: '1f', value: palette.grainStrength },
+    });
+    this.bg = this.add.shader(
+      baseShader,
+      resolved.worldWidth / 2,
+      resolved.worldHeight / 2,
+      resolved.worldWidth,
+      resolved.worldHeight,
+    );
+    this.bg.setDepth(-100);
+
+    const grounds = resolved.ground.map((spec) => new Platform(this, spec));
+    const platforms = resolved.platforms.map((spec) => new Platform(this, spec));
+    const spikes = resolved.spikes.map((spec) => new Spike(this, spec));
+    const doorways = resolved.doorways.map(
       (spec) => new Doorway(this, spec.x, spec.y, { id: spec.id, label: spec.label }),
     );
 
-    const player = new Player(this, data.spawn.x, data.spawn.y);
-    player.setFacing(data.spawn.facing);
+    const player = new Player(this, resolved.spawn.x, resolved.spawn.y);
+    player.setFacing(resolved.spawn.facing);
 
     this.physics.add.collider(player, [...grounds, ...platforms]);
     if (spikes.length > 0) {
       this.physics.add.overlap(player, spikes, () => this.respawnPlayer());
     }
 
-    this.physics.world.setBounds(0, 0, WORLD_W, WORLD_H);
-    this.cameras.main.setBounds(0, 0, WORLD_W, WORLD_H);
+    this.physics.world.setBounds(0, 0, resolved.worldWidth, resolved.worldHeight);
+    this.cameras.main.setBounds(0, 0, resolved.worldWidth, resolved.worldHeight);
     this.cameras.main.startFollow(player, true, 0.1, 0.1);
-    if (WORLD_W > VIEWPORT_W) {
-      this.cameras.main.setDeadzone(VIEWPORT_W * 0.25, VIEWPORT_H);
+    if (resolved.worldWidth > vp.width) {
+      this.cameras.main.setDeadzone(vp.width * 0.25, resolved.worldHeight);
     }
 
     this.player = player;
-    this.respawnAnchor = { ...data.spawn };
+    this.respawnAnchor = { ...resolved.spawn };
+
+    this.grounds = grounds;
+    this.platforms = platforms;
+    this.spikes = spikes;
+    this.doorways = doorways;
 
     return { player, doorways, grounds, platforms, spikes };
   }
@@ -116,7 +148,6 @@ export abstract class RoomScene extends Phaser.Scene {
   /**
    * Trigger respawn if the player has fallen past the world floor.
    * Subclasses call this from update() after `player.update()`.
-   * Implementation lands in Task 9.
    */
   protected checkPitFall(playerY: number): void {
     if (this.respawning || this.paused) return;

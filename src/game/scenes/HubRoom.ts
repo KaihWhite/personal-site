@@ -2,7 +2,6 @@
 import Phaser from 'phaser';
 import { gameBridge } from '@/game/bridge';
 import { Doorway } from '@/game/entities/Doorway';
-import roomBgGlsl from '@/game/shaders/room-bg.glsl';
 import { HUB_PALETTE } from '@/game/shaders/roomPalettes';
 import { RoomScene } from './RoomScene';
 import { SCENE_TRANSITION_MS, type CorridorSpawn, type CorridorInitData } from './corridorSpawn';
@@ -18,20 +17,13 @@ export class HubRoom extends RoomScene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
+    const { doorways } = this.buildLevel(hubLevel, HUB_PALETTE);
+    // doorways order matches hubLevel.doorways: [portfolio, about, contact].
+    this.portfolioDoorway = doorways[0]!;
+    this.aboutDoorway     = doorways[1]!;
+    this.contactDoorway   = doorways[2]!;
 
-    const baseShader = new Phaser.Display.BaseShader('room-bg', roomBgGlsl, undefined, {
-      uColorDeep:     { type: '3f', value: HUB_PALETTE.deep },
-      uColorMid:      { type: '3f', value: HUB_PALETTE.mid },
-      uColorAccent:   { type: '3f', value: HUB_PALETTE.accent },
-      uWaveSpeed:     { type: '1f', value: HUB_PALETTE.waveSpeed },
-      uWaveAmplitude: { type: '1f', value: HUB_PALETTE.waveAmplitude },
-      uGrainStrength: { type: '1f', value: HUB_PALETTE.grainStrength },
-    });
-    const bg = this.add.shader(baseShader, width / 2, height / 2, width, height);
-    bg.setDepth(-100);
-
-    // In-world "KW" signage above the plinth (moved up 64px from Phase 3b for plinth clearance).
+    // In-world "KW" signage above the plinth. (Re-anchored responsively in Task 8.)
     const logo = this.add.text(640, 600, 'KW', {
       fontFamily: 'monospace',
       fontSize: '48px',
@@ -40,14 +32,7 @@ export class HubRoom extends RoomScene {
     logo.setOrigin(0.5, 0.5);
     logo.setAlpha(0.85);
 
-    const { doorways } = this.buildLevel(hubLevel);
-    // doorways order matches hubLevel.doorways: [portfolio, about, contact].
-    this.portfolioDoorway = doorways[0]!;
-    this.aboutDoorway     = doorways[1]!;
-    this.contactDoorway   = doorways[2]!;
-
     this.wireBridge();
-
     gameBridge.emit('game:ready', undefined);
     gameBridge.emit('game:scene-changed', { room: 'HubRoom' });
   }

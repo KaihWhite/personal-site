@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { gameBridge } from '@/game/bridge';
 import { Doorway } from '@/game/entities/Doorway';
 import { Panel } from '@/game/entities/Panel';
-import roomBgGlsl from '@/game/shaders/room-bg.glsl';
 import { ABOUT_PALETTE } from '@/game/shaders/roomPalettes';
 import { RoomScene } from './RoomScene';
 import { SCENE_TRANSITION_MS } from './corridorSpawn';
@@ -17,20 +16,7 @@ export class AboutRoom extends RoomScene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
-
-    const baseShader = new Phaser.Display.BaseShader('room-bg', roomBgGlsl, undefined, {
-      uColorDeep:     { type: '3f', value: ABOUT_PALETTE.deep },
-      uColorMid:      { type: '3f', value: ABOUT_PALETTE.mid },
-      uColorAccent:   { type: '3f', value: ABOUT_PALETTE.accent },
-      uWaveSpeed:     { type: '1f', value: ABOUT_PALETTE.waveSpeed },
-      uWaveAmplitude: { type: '1f', value: ABOUT_PALETTE.waveAmplitude },
-      uGrainStrength: { type: '1f', value: ABOUT_PALETTE.grainStrength },
-    });
-    const bg = this.add.shader(baseShader, (aboutLevel.worldWidth ?? width) / 2, height / 2, aboutLevel.worldWidth ?? width, height);
-    bg.setDepth(-100);
-
-    const { doorways } = this.buildLevel(aboutLevel);
+    const { doorways } = this.buildLevel(aboutLevel, ABOUT_PALETTE);
     this.returnDoorway = doorways[0]!;
 
     this.panels = aboutPanels.map((p) => new Panel(this, p.x, p.y, p.data));

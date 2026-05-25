@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import { gameBridge } from '@/game/bridge';
 import { Doorway } from '@/game/entities/Doorway';
-import roomBgGlsl from '@/game/shaders/room-bg.glsl';
 import { CONTACT_PALETTE } from '@/game/shaders/roomPalettes';
 import { RoomScene } from './RoomScene';
 import { SCENE_TRANSITION_MS } from './corridorSpawn';
@@ -16,20 +15,7 @@ export class ContactRoom extends RoomScene {
   }
 
   create(): void {
-    const { width, height } = this.scale;
-
-    const baseShader = new Phaser.Display.BaseShader('room-bg', roomBgGlsl, undefined, {
-      uColorDeep:     { type: '3f', value: CONTACT_PALETTE.deep },
-      uColorMid:      { type: '3f', value: CONTACT_PALETTE.mid },
-      uColorAccent:   { type: '3f', value: CONTACT_PALETTE.accent },
-      uWaveSpeed:     { type: '1f', value: CONTACT_PALETTE.waveSpeed },
-      uWaveAmplitude: { type: '1f', value: CONTACT_PALETTE.waveAmplitude },
-      uGrainStrength: { type: '1f', value: CONTACT_PALETTE.grainStrength },
-    });
-    const bg = this.add.shader(baseShader, (contactLevel.worldWidth ?? width) / 2, height / 2, contactLevel.worldWidth ?? width, height);
-    bg.setDepth(-100);
-
-    const { doorways } = this.buildLevel(contactLevel);
+    const { doorways } = this.buildLevel(contactLevel, CONTACT_PALETTE);
     this.returnDoorway = doorways[0]!;
     this.viewDoorway = doorways[1]!;
 
