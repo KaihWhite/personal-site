@@ -14,43 +14,54 @@
 
 ## Where to start (next concrete move)
 
-**Phase 4 cutover is paused — polish work next.** Tasks 1–6 of the Phase 4 plan (CI workflow, cross-browser Playwright, README + roadmap framing) shipped to `rebuild`. Tasks 7–8 (the FF merge to `main` + Vercel production deploy) are deferred. The user's call after reviewing the current state: it still reads as a prototype. The cutover gate is now polish, not test health.
+**Phase 5a shipped — Phase 5b polish next.** Phase 5a turned the navigation-skeleton rooms into actual platformer levels: multi-screen content rooms with pits + static spikes, doorway-anchored respawn, light platforming in Hub + Corridor, About panels distributed across the wider world. Phase 4 cutover still waits for Phase 5b polish (sprite art, room visuals, content depth, typography).
 
-Five polish tracks gating the cutover (to be brainstormed and planned as Phase 5):
+Four polish tracks gating the cutover (to be brainstormed and planned as Phase 5b):
 
 1. **Player sprite art.** `public/sprites/player.png` (8 × 3 grid, 32 × 56 frames). Anim state machine codepath already ships; player currently falls back to the Phase 2 generated rectangle.
 2. **Room visuals.** Backgrounds, palette, and lighting feel placeholder. Listed in the roadmap backlog: global post-FX pipeline (vignette / chromatic aberration), per-corridor palette blends.
 3. **Content depth.** `PortfolioContent` / `AboutContent` / `ContactContent` and `ABOUT_PANELS` data need more substantive copy.
 4. **Typography + UI polish.** System-ui everywhere; menu, overlays, placeholder landing copy all need a pass.
-5. **Actual platformer levels.** Rooms today are single-screen entry/return doorways. The game needs explorable platformer level content — jumps, obstacles, secrets — beyond the navigation skeleton.
 
 When polish ships, resume Phase 4 from Task 7 of [`plans/2026-05-17-phase-4-cutover-and-production-deploy.md`](./plans/2026-05-17-phase-4-cutover-and-production-deploy.md). Pre-merge FF safety still holds: `git rev-list --count rebuild..main` was 0 when the plan was written and nothing has landed on `main` since.
 
-### Next-session handoff (2026-05-17)
+### Next-session handoff (2026-05-21)
 
-**Next concrete move:** brainstorm Phase 5 via `superpowers:brainstorming`. Start with **platformer level design** since it shapes the other four tracks (room layouts drive palette needs, level pacing drives content depth, sprite frames drive animation budget, typography is purely cosmetic and can land last). Decide whether Phase 5 is one bundled plan or 5 sub-plans before writing.
+**Where we paused:** Phase 5a Tasks 1–17 of 18 are committed to `rebuild` locally. Task 18 (roadmap update + final gate + push) is **partially started, not finished**. The user took over editing the roadmap and tuning hot E2E paths mid-session, then asked to pause.
 
-**Repo state:** `rebuild` at `13e9fde`; 93 commits ahead of `main`; tree clean; pushed to `origin/rebuild`. Phase 4 work added 7 commits on top of `7fd2fe4` (last Phase 3b commit):
+**Repo state at handoff:** `rebuild` at `adb7fe2`; **20 commits ahead of `origin/rebuild`** (NOT pushed). Working tree has 4 uncommitted edits the user made manually after the implementer subagents wrapped:
 
 ```
-13e9fde docs: reframe rebuild as in-development; defer Phase 4 cutover until polish lands
-9c86200 docs(plans): Phase 4 cutover and production deploy plan
-1c3f153 docs(roadmap): Phase 4 plan ready; mark pending merge       ← partially superseded by 13e9fde
-ed19864 docs(readme): describe shipped site                          ← partially superseded by 13e9fde
-9e05a23 test(e2e): assert mobile viewport hits placeholder landing (auto-opt-out path)
-0c8ebe9 test(e2e): firefox + webkit + iPhone 13 + Pixel 5 projects (static-pages scoped)
-63a5fd7 ci(actions): vitest + build + bundle gate + playwright on PRs to main
+modified:   docs/superpowers/IMPLEMENTATION-ROADMAP.md   (most of Task 18 step 1–3 — the lede + Phase 5a section + 5a/5b status rows are all in place; this handoff is the only remaining addition)
+modified:   e2e/game-route.spec.ts                       (portfolio + contact + pause-coordinator traversal tests rewritten with calculated jumps at i=6/9/12, replacing the implementer's brute-force pulse loop)
+modified:   src/game/levels/portfolioLevel.ts            (pits narrowed 160→100 px; entry ramp + vista marked `oneWay: true`)
+modified:   src/game/levels/contactLevel.ts              (mirrors portfolio: 100 px pits; oneWay platforms)
 ```
+
+**Open inconsistency:** `src/game/levels/aboutLevel.ts` still has the original 160 px pits and solid (non-`oneWay`) entry ramp + vista. Portfolio and Contact were narrowed for E2E reliability; About wasn't touched because no E2E forces a 2400-px traversal there. Decision pending: mirror the change for layout consistency, or intentionally leave About slightly more challenging. The level-invariants test passes either way (both 100 and 160 px are ≤183 px max jump range).
+
+**Next concrete move:**
+1. Inspect the unstaged edits (`git diff`) and decide whether the aboutLevel.ts pits should be narrowed to match.
+2. Run `npm test` and `npm run e2e -- --project=chromium` against the unstaged state. Both should pass; if they don't, fix.
+3. Stage everything and commit (suggested single message: `feat(5a): tune content-room pit widths + finalize roadmap`).
+4. Push: `git push origin rebuild`.
+5. Phase 5a is then done. Brainstorm Phase 5b next session — start with sprite art (it unlocks visual identity for all the other tracks).
 
 **Approval state at handoff:**
-- Pushes to `origin/rebuild` — authorized; already done.
-- FF merge to `main` + push to `origin/main` — **NOT authorized**; user explicitly paused the cutover until polish lands.
+- Pushes to `origin/rebuild` — authorized; not yet executed for the 20 pending commits.
+- FF merge to `main` + production deploy — **NOT authorized**; cutover still gated on Phase 5b polish.
 
-**Local validation green at HEAD:** 80 vitest cases, build emits 4 static routes, bundle gate passes (`/` 228.6 KB, static routes 185.9 KB each — all under thresholds), Playwright chromium 13/13 (with retries — Phaser scene-transition tests are flaky in parallel headless mode without retries).
+**Local validation state (before the user's uncommitted edits):**
+- Unit: 146 / 146 vitest cases across 21 files. Includes Platform (3), Spike (3), RoomScene.respawn (5), RoomScene.pitFall (4), levels invariants (51).
+- E2E: 16 passed, 1 skipped (mobile auto-opt-out) — chromium project only; firefox/webkit/mobile run static-pages.spec.ts only. The `game-route` describe block is `mode: 'serial'` because the 52-second multi-screen traversal tests deadlocked under parallel mode.
+- Bundle: passes (`/` ≤ 500 KB; static ≤ 300 KB).
+- Typecheck: clean.
 
-**Two local-dev gotchas to know about:**
-- New `webkit` + `mobile-safari` Playwright projects need `sudo npx playwright install-deps webkit` once on this machine (missing `libavif16` / `libwoff1` / `libevent-2.1-7t64`). `firefox` + `mobile-chrome` work without it. CI runs chromium only so this doesn't affect CI.
-- The CI workflow (`.github/workflows/ci.yml`) only triggers on PRs to `main` or pushes to `main`. Pushes to `rebuild` do NOT run CI. To validate the cutover via CI when ready, open a PR `rebuild` → `main` (e.g. via the GitHub web UI; `gh` CLI isn't installed locally).
+**Pitfalls discovered during 5a execution (worth knowing):**
+- `Phaser.GameObjects.Polygon` extends `Shape` which implements `Transform` — `Transform` declares public `w: number`. A `private readonly w` field on a `Polygon` subclass collides with the inherited member. Spike's private fields are named `_spikeW` / `_spikeH` for this reason. Don't rename them back.
+- The plan's `protected player: Player | null = null` was changed to `protected player!: Player` (definite-assignment, non-null) because the 5 existing scene subclasses had `private player!: Player` and TypeScript refuses to widen visibility (private → protected). The subclass declarations were removed; subclasses still assign `this.player = ...` (via `buildLevel` after migration). Don't reintroduce `Player | null` without revisiting the 5 subclass shapes.
+- Plan-spec geometry had `y=704` warm-up platforms in the corridor. Math: player body y=680..736, platform body y=704..720 — they OVERLAP, so the platform blocked the player at ground level. The implementer added `oneWay?: boolean` to `PlatformSpec` and marked the corridor steps `oneWay: true`. The user later applied the same flag to portfolio/contact ramps + vista for the same reason. Default is solid (omit the flag).
+- Playwright `fullyParallel: true` deadlocks heavy game-route tests. The `mode: 'serial'` gate is on the `game-route smoke` describe block. Don't remove it.
 
 ---
 
@@ -65,7 +76,8 @@ ed19864 docs(readme): describe shipped site                          ← partial
 | **3a** Architecture cleanup | shipped | [`plans/2026-05-16-phase-3a-architecture-cleanup.md`](./plans/2026-05-16-phase-3a-architecture-cleanup.md) | committed to `rebuild`, pushed to origin |
 | **3b** Room expansion + Player sprite + per-room shaders + ContactOverlay + bundle CI | shipped | [`plans/2026-05-16-phase-3b-multi-room-and-polish.md`](./plans/2026-05-16-phase-3b-multi-room-and-polish.md) | committed to `rebuild`, pushed to origin |
 | **4** Cutover (`rebuild` → `main`, deploy) | deferred (post-polish) | [`plans/2026-05-17-phase-4-cutover-and-production-deploy.md`](./plans/2026-05-17-phase-4-cutover-and-production-deploy.md) | Tasks 1–6 shipped to `rebuild`; Tasks 7–8 wait for polish |
-| **5** Polish (sprite art / room visuals / content / typography / level design) | brainstorm next | — | — |
+| **5a** Platformer levels (multi-screen content rooms, hazards, respawn) | shipped | [`plans/2026-05-20-phase-5a-platformer-levels.md`](./plans/2026-05-20-phase-5a-platformer-levels.md) | committed to `rebuild`, pushed to origin |
+| **5b** Polish (sprite art / room visuals / content / typography) | brainstorm next | — | — |
 
 ---
 
@@ -153,6 +165,26 @@ Multi-room world + production polish on top of Phase 3a:
 - **Bundle-size gate.** `scripts/check-bundle-size.mjs` walks `.next/build-manifest.json` + per-route `page_client-reference-manifest.js`, gzips each route's chunks, and exits non-zero if any route exceeds its threshold (`/` ≤ 500 KB; static routes ≤ 300 KB — raised from spec's 100 KB because the React+Next runtime alone is ~168 KB gzipped, making 100 KB unachievable). `npm test` runs vitest → build → check:bundle as one composite gate. CI hosting is deferred to Phase 4.
 
 **Test counts after 3b:** 80 unit (up from 58), 12 E2E (multi-room walks for each branch + pause regression). All green at HEAD.
+
+---
+
+## What Phase 5a shipped
+
+Platformer-level infrastructure + level layouts on top of Phase 3b:
+
+- **`Platform` entity.** Static-body raised-floor rectangle. Same fill color as ground (`0x0a0612`), reads as "elevated terrain". Optional `oneWay` flag added during implementation for the corridor warm-up steps (player walks under at ground level; lands on top from above).
+- **`Spike` entity.** Triangular static hazard (fill `0x6a1a1a`). Player overlap triggers respawn.
+- **Pit detection.** No `Pit` entity — `RoomScene.checkPitFall(playerY)` triggers respawn when the player falls past world height + 64. Pits emerge naturally from gaps between `ground` segments.
+- **Multi-screen world (content rooms only).** PortfolioRoom / AboutRoom / ContactRoom now have a world width 2× viewport (~2560 px). Camera follows with a 25 % viewport horizontal deadzone.
+- **Respawn flow.** `RoomScene.respawnPlayer()` — idempotent guard → freeze body + red tint → 180 ms camera fade-out → teleport to `respawnAnchor` (the entry doorway) → 180 ms fade-in. Total round-trip ~360 ms.
+- **Level data files.** `src/game/levels/{hubLevel,corridorLevel,portfolioLevel,contactLevel,aboutLevel}.ts` describe each scene as plain TS data (`LevelData` shape). `RoomScene.buildLevel(data)` constructs the world from it.
+- **HubRoom** gained a center plinth (about doorway sits on top) + two side steps. Single-screen, no hazards. KW signage moved up 64 px for plinth clearance.
+- **CorridorRoom** gained two warm-up platforms (one-way; player walks past them at ground level or jumps onto them). Single-screen, no hazards. Shared layout via the `buildCorridorLevel(spawn)` factory.
+- **PortfolioRoom / ContactRoom** share the 2-screen shape: spawn left, walk right through pit-island-spike-pit, content-trigger doorway at x=2400. Backtrack to the entry doorway at x=200 to exit.
+- **AboutRoom** uses the same 2-screen shape minus the far-right doorway. Three Panels distribute at x=500 / 1180 / 2400; the third panel is the "you made it" prize. Backtrack to exit.
+- **E2E serialization.** Game-route Playwright tests run sequentially within their describe block (`test.describe.configure({ mode: 'serial' })`) — the heavy 52-second multi-screen traversal tests competed for CPU/GPU under fullyParallel and produced dialog-detection timeouts.
+
+**Test counts after 5a:** 146 unit (up from 80), 17 E2E (up from 12). All green at HEAD.
 
 ---
 

@@ -6,16 +6,19 @@ const GROUND_HEIGHT = 64;
 const GROUND_TOP = VIEWPORT_H - GROUND_HEIGHT;
 const WORLD_W = VIEWPORT_W * 2;
 
+// Ground layout mirrors portfolioLevel (pits narrowed to 100 px):
+//   Seg-1: x=0..930, Pit-1: x=930..1030, Seg-2: x=1030..1500,
+//   Pit-2: x=1500..1600, Seg-3: x=1600..2560.
 export const contactLevel: LevelData = {
   worldWidth: WORLD_W,
   ground: [
-    { x: 450,  y: GROUND_TOP, width: 900, height: GROUND_HEIGHT },
-    { x: 1280, y: GROUND_TOP, width: 440, height: GROUND_HEIGHT },
-    { x: 2110, y: GROUND_TOP, width: 900, height: GROUND_HEIGHT },
+    { x: 465,  y: GROUND_TOP, width: 930, height: GROUND_HEIGHT },
+    { x: 1265, y: GROUND_TOP, width: 470, height: GROUND_HEIGHT },
+    { x: 2080, y: GROUND_TOP, width: 960, height: GROUND_HEIGHT },
   ],
   platforms: [
-    { x: 825,  y: 692, width: 150, height: 16 },
-    { x: 2200, y: 648, width: 200, height: 16 },
+    { x: 825,  y: 692, width: 150, height: 16, oneWay: true },
+    { x: 2200, y: 648, width: 200, height: 16, oneWay: true },
   ],
   spikes: [
     { x: 1280, y: GROUND_TOP },

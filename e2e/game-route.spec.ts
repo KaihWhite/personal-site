@@ -60,24 +60,38 @@ test.describe('game-route smoke', () => {
     await page.waitForTimeout(1000);
 
     // PortfolioRoom: spawn at x=300, view doorway at x=2400, return doorway at x=200.
-    // Hazards: pit-1 (x=900..1060), spike (x=1280), pit-2 (x=1500..1660).
+    // Platforms (oneWay): x=825 (y=692, width=150), x=2200 (y=648, width=200).
+    // Hazards (pits narrowed to 100px): pit-1 (x=930..1030), spike (x=1280), pit-2 (x=1500..1600).
     //
-    // Strategy: hold ArrowRight and pulse BOTH Space (jump, every ~700ms) AND ArrowUp
-    // (interact, every ~380ms) for ~40 s. The player clears hazards by jumping; when it
-    // crosses the view doorway (x≈2400) an ArrowUp pulse triggers the overlay and the
-    // pauseCoordinator freezes physics — player stays in the doorway zone for the dialog.
-    // 40 s covers two full traversals (8.4 s each) + budget for up to 2 respawns.
+    // Strategy: hold ArrowRight; platforms are oneWay so player walks through them.
+    // Fire jumps at the pit/spike edges (calculated from 250 px/s walk speed from x=300):
+    //   Pit-1 edge x=930  → t≈2520 ms (launch at t=2400 ms for 120ms safety margin)
+    //   Spike  x=1280     → t≈3920 ms (launch at t=3850 ms)
+    //   Pit-2 edge x=1500 → t≈4800 ms (launch at t=4750 ms)
+    //   View doorway x=2400 → arrive at t≈8400 ms; pulse ArrowUp to open overlay.
+    // If a respawn occurs, the fallback pulse loop (ArrowUp every ~380ms, Space every ~760ms)
+    // covers additional time. Total budget: 3 scripted jumps (~8.4s) + 20s pulse tail = ~30s.
+    // PortfolioRoom traversal: hold ArrowRight + pulse ArrowUp every ~380ms throughout.
+    // ArrowUp only triggers when the player is in a doorway zone (isInteractPressed).
+    // Jump at specific offsets to clear the 3 hazards (250px/s, 183px jump range):
+    //   i=6  (t≈2280ms, x≈870):  jump for pit-1 (x=930..1030, 100px) — lands x≈1053
+    //   i=9  (t≈3470ms, x≈1167): jump for spike (x=1268..1292) — clears it airborne
+    //   i=12 (t≈4660ms, x≈1465): jump for pit-2 (x=1500..1600, 100px) — lands x≈1648
+    // After i=12, also pulse Space every 6th iteration for respawn-recovery coverage.
+    // Player reaches view doorway (x=2400) at i≈21. Loop runs 100 iterations (~40s budget).
     await page.keyboard.down('ArrowRight');
-    for (let i = 0; i < 100; i++) {
+    let portfolioOpened = false;
+    for (let i = 0; i < 100 && !portfolioOpened; i++) {
+      const isScriptedJump = i === 6 || i === 9 || i === 12;
+      const isRecoveryJump = i > 12 && i % 6 === 0;
+      if (isScriptedJump || isRecoveryJump) {
+        await page.keyboard.down('Space'); await page.waitForTimeout(50); await page.keyboard.up('Space');
+      }
       await page.waitForTimeout(180);
       await page.keyboard.down('ArrowUp');
       await page.waitForTimeout(200);
       await page.keyboard.up('ArrowUp');
-      if (i % 4 === 1) {
-        await page.keyboard.down('Space');
-        await page.waitForTimeout(50);
-        await page.keyboard.up('Space');
-      }
+      portfolioOpened = await page.getByRole('dialog', { name: /portfolio/i }).isVisible().catch(() => false);
     }
     await page.keyboard.up('ArrowRight');
 
@@ -149,19 +163,20 @@ test.describe('game-route smoke', () => {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // ContactRoom: spawn at x=300, view doorway at x=2400. Same shape as portfolio.
-    // Dual-pulse walk: Space for jumps, ArrowUp to trigger doorway. 100 * ~380ms ≈ 40 s budget.
+    // ContactRoom: same layout and traversal pattern as PortfolioRoom.
     await page.keyboard.down('ArrowRight');
-    for (let i = 0; i < 100; i++) {
+    let contactOpened = false;
+    for (let i = 0; i < 100 && !contactOpened; i++) {
+      const isScriptedJump = i === 6 || i === 9 || i === 12;
+      const isRecoveryJump = i > 12 && i % 6 === 0;
+      if (isScriptedJump || isRecoveryJump) {
+        await page.keyboard.down('Space'); await page.waitForTimeout(50); await page.keyboard.up('Space');
+      }
       await page.waitForTimeout(180);
       await page.keyboard.down('ArrowUp');
       await page.waitForTimeout(200);
       await page.keyboard.up('ArrowUp');
-      if (i % 4 === 1) {
-        await page.keyboard.down('Space');
-        await page.waitForTimeout(50);
-        await page.keyboard.up('Space');
-      }
+      contactOpened = await page.getByRole('dialog', { name: /contact/i }).isVisible().catch(() => false);
     }
     await page.keyboard.up('ArrowRight');
 
@@ -197,18 +212,20 @@ test.describe('game-route smoke', () => {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // ContactRoom: same dual-pulse walk as contact test.
+    // ContactRoom: same layout and traversal pattern as PortfolioRoom.
     await page.keyboard.down('ArrowRight');
-    for (let i = 0; i < 100; i++) {
+    let openedPause = false;
+    for (let i = 0; i < 100 && !openedPause; i++) {
+      const isScriptedJump = i === 6 || i === 9 || i === 12;
+      const isRecoveryJump = i > 12 && i % 6 === 0;
+      if (isScriptedJump || isRecoveryJump) {
+        await page.keyboard.down('Space'); await page.waitForTimeout(50); await page.keyboard.up('Space');
+      }
       await page.waitForTimeout(180);
       await page.keyboard.down('ArrowUp');
       await page.waitForTimeout(200);
       await page.keyboard.up('ArrowUp');
-      if (i % 4 === 1) {
-        await page.keyboard.down('Space');
-        await page.waitForTimeout(50);
-        await page.keyboard.up('Space');
-      }
+      openedPause = await page.getByRole('dialog', { name: /contact/i }).isVisible().catch(() => false);
     }
     await page.keyboard.up('ArrowRight');
 
@@ -271,28 +288,28 @@ test.describe('game-route smoke', () => {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // PortfolioRoom: spawn at x=300. Walk right WITHOUT continuously jumping so we fall into
-    // hazards and trigger respawn. Use brute-force ArrowUp pulses every ~380ms to detect doorways,
-    // but use Space sparingly — only once to clear pit-1 so we can reach the spike at x=1280.
-    // After the spike hit the canvas must still be visible (respawn occurred, player teleports back).
+    // PortfolioRoom: spawn at x=300. Walk right, jump pit-1 (now x=930..1030, 100px wide),
+    // then walk into spike at x=1280 WITHOUT jumping — triggers respawn.
+    // Canvas must remain visible after the spike contact.
     await page.keyboard.down('ArrowRight');
 
-    // Phase 1: ~2500ms to approach pit-1 without jumping (x=900..1060).
-    for (let i = 0; i < 7; i++) {
+    // Phase 1: ~2280ms (6 ArrowUp iterations × 380ms) to approach pit-1 edge at x=930.
+    // Player at x=870 (before new pit-1 edge at x=930); then jump to clear it.
+    for (let i = 0; i < 6; i++) {
       await page.waitForTimeout(180);
       await page.keyboard.down('ArrowUp');
       await page.waitForTimeout(200);
       await page.keyboard.up('ArrowUp');
     }
 
-    // Jump pit-1 once.
+    // Jump pit-1 (x=930..1030) — launch at x≈870, land at x≈1053 (on ground-2).
     await page.keyboard.down('Space');
     await page.waitForTimeout(50);
     await page.keyboard.up('Space');
     await page.waitForTimeout(500);
 
-    // Phase 2: Walk into the spike at x=1280 (~1500ms from pit-1 end).
-    // Continue ArrowUp pulsing; stop Space so player lands on spike tile.
+    // Phase 2: Walk into the spike at x=1280 without jumping.
+    // (~1500ms from pit-1 land to spike). Continue ArrowUp pulsing; no Space.
     for (let i = 0; i < 10; i++) {
       await page.waitForTimeout(180);
       await page.keyboard.down('ArrowUp');
@@ -332,10 +349,10 @@ test.describe('game-route smoke', () => {
     await page.keyboard.up('ArrowUp');
     await page.waitForTimeout(1000);
 
-    // PortfolioRoom: walk right WITHOUT jumping. Player will fall into pit-1 (x=900..1060)
+    // PortfolioRoom: walk right WITHOUT jumping. Player will fall into pit-1 (x=930..1030)
     // and trigger checkPitFall once they pass world height + 64.
     await page.keyboard.down('ArrowRight');
-    await page.waitForTimeout(3500); // walk from x=300 to past x=900, fall, fade, respawn
+    await page.waitForTimeout(3500); // walk from x=300 to past x=930, fall, fade, respawn
     await page.keyboard.up('ArrowRight');
     await page.waitForTimeout(500);
 

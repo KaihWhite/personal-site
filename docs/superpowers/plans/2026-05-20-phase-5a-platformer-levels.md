@@ -10,6 +10,8 @@
 
 **Spec:** [`docs/superpowers/specs/2026-05-20-phase-5a-platformer-levels-design.md`](../specs/2026-05-20-phase-5a-platformer-levels-design.md). Read it before starting.
 
+> **Execution status (2026-05-21):** Tasks 1–17 committed to `rebuild` (commits `282675e` → `adb7fe2`). Task 18 is partial — the roadmap edits + level-data tuning + E2E refinements are unstaged in the working tree; staging + commit + push to `origin/rebuild` is the only remaining work. Step-level checkboxes below were NOT updated during execution; rely on the roadmap's `Next-session handoff (2026-05-21)` section for the authoritative outstanding-work list.
+
 ---
 
 ## File map
