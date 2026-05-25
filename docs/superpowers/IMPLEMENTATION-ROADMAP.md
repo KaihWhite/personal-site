@@ -25,43 +25,9 @@ Four polish tracks gating the cutover (to be brainstormed and planned as Phase 5
 
 When polish ships, resume Phase 4 from Task 7 of [`plans/2026-05-17-phase-4-cutover-and-production-deploy.md`](./plans/2026-05-17-phase-4-cutover-and-production-deploy.md). Pre-merge FF safety still holds: `git rev-list --count rebuild..main` was 0 when the plan was written and nothing has landed on `main` since.
 
-### Next-session handoff (2026-05-21)
+### Open decision carried into Phase 5b
 
-**Where we paused:** Phase 5a Tasks 1–17 of 18 are committed to `rebuild` locally. Task 18 (roadmap update + final gate + push) is **partially started, not finished**. The user took over editing the roadmap and tuning hot E2E paths mid-session, then asked to pause.
-
-**Repo state at handoff:** `rebuild` at `adb7fe2`; **20 commits ahead of `origin/rebuild`** (NOT pushed). Working tree has 4 uncommitted edits the user made manually after the implementer subagents wrapped:
-
-```
-modified:   docs/superpowers/IMPLEMENTATION-ROADMAP.md   (most of Task 18 step 1–3 — the lede + Phase 5a section + 5a/5b status rows are all in place; this handoff is the only remaining addition)
-modified:   e2e/game-route.spec.ts                       (portfolio + contact + pause-coordinator traversal tests rewritten with calculated jumps at i=6/9/12, replacing the implementer's brute-force pulse loop)
-modified:   src/game/levels/portfolioLevel.ts            (pits narrowed 160→100 px; entry ramp + vista marked `oneWay: true`)
-modified:   src/game/levels/contactLevel.ts              (mirrors portfolio: 100 px pits; oneWay platforms)
-```
-
-**Open inconsistency:** `src/game/levels/aboutLevel.ts` still has the original 160 px pits and solid (non-`oneWay`) entry ramp + vista. Portfolio and Contact were narrowed for E2E reliability; About wasn't touched because no E2E forces a 2400-px traversal there. Decision pending: mirror the change for layout consistency, or intentionally leave About slightly more challenging. The level-invariants test passes either way (both 100 and 160 px are ≤183 px max jump range).
-
-**Next concrete move:**
-1. Inspect the unstaged edits (`git diff`) and decide whether the aboutLevel.ts pits should be narrowed to match.
-2. Run `npm test` and `npm run e2e -- --project=chromium` against the unstaged state. Both should pass; if they don't, fix.
-3. Stage everything and commit (suggested single message: `feat(5a): tune content-room pit widths + finalize roadmap`).
-4. Push: `git push origin rebuild`.
-5. Phase 5a is then done. Brainstorm Phase 5b next session — start with sprite art (it unlocks visual identity for all the other tracks).
-
-**Approval state at handoff:**
-- Pushes to `origin/rebuild` — authorized; not yet executed for the 20 pending commits.
-- FF merge to `main` + production deploy — **NOT authorized**; cutover still gated on Phase 5b polish.
-
-**Local validation state (before the user's uncommitted edits):**
-- Unit: 146 / 146 vitest cases across 21 files. Includes Platform (3), Spike (3), RoomScene.respawn (5), RoomScene.pitFall (4), levels invariants (51).
-- E2E: 16 passed, 1 skipped (mobile auto-opt-out) — chromium project only; firefox/webkit/mobile run static-pages.spec.ts only. The `game-route` describe block is `mode: 'serial'` because the 52-second multi-screen traversal tests deadlocked under parallel mode.
-- Bundle: passes (`/` ≤ 500 KB; static ≤ 300 KB).
-- Typecheck: clean.
-
-**Pitfalls discovered during 5a execution (worth knowing):**
-- `Phaser.GameObjects.Polygon` extends `Shape` which implements `Transform` — `Transform` declares public `w: number`. A `private readonly w` field on a `Polygon` subclass collides with the inherited member. Spike's private fields are named `_spikeW` / `_spikeH` for this reason. Don't rename them back.
-- The plan's `protected player: Player | null = null` was changed to `protected player!: Player` (definite-assignment, non-null) because the 5 existing scene subclasses had `private player!: Player` and TypeScript refuses to widen visibility (private → protected). The subclass declarations were removed; subclasses still assign `this.player = ...` (via `buildLevel` after migration). Don't reintroduce `Player | null` without revisiting the 5 subclass shapes.
-- Plan-spec geometry had `y=704` warm-up platforms in the corridor. Math: player body y=680..736, platform body y=704..720 — they OVERLAP, so the platform blocked the player at ground level. The implementer added `oneWay?: boolean` to `PlatformSpec` and marked the corridor steps `oneWay: true`. The user later applied the same flag to portfolio/contact ramps + vista for the same reason. Default is solid (omit the flag).
-- Playwright `fullyParallel: true` deadlocks heavy game-route tests. The `mode: 'serial'` gate is on the `game-route smoke` describe block. Don't remove it.
+**About-room pit widths are intentionally un-mirrored (for now).** `portfolioLevel.ts` and `contactLevel.ts` use **100 px** pits with `oneWay: true` entry ramp + vista (narrowed for reliable E2E jump clearance). `aboutLevel.ts` still uses the original **160 px** pits and solid (non-`oneWay`) ramp + vista — About has no E2E that forces a 2400-px traversal, so it was never narrowed. The level-invariants test passes either way (both ≤ 183 px `MAX_JUMP_RANGE`). Pending call when Phase 5b touches level geometry: mirror the 100 px / `oneWay` shape for layout consistency, or keep About slightly more challenging on purpose.
 
 ---
 
@@ -227,7 +193,7 @@ Listed so the next agent doesn't think they're missed bugs.
 
 ## Pitfalls discovered (so the next agent doesn't re-hit them)
 
-These were resolved during Phase 1 execution. Don't undo the resolutions.
+These were resolved during execution (Phases 1–5a). Don't undo the resolutions.
 
 1. **Never pin exact npm versions.** `next: "16.2.6"` (exact) made `npm install` run for hours — npm thrashed on resolution, likely due to React 19 / Next 16's RC-versus-stable history. Caret ranges (`^16.2.6`) install in ~19 seconds. Phase 1 commit `ff875a0` is the working `package.json`. Note: the Phase 1 plan document at Task 2 Step 1 still shows exact versions — that's a historical artifact; do not "correct" the committed `package.json` back to exact pins. If a future package genuinely requires exact pinning (rare), do it after install succeeds, not before.
 2. **Next 16 removed `next lint`.** Use `eslint .` directly in the lint script. The CLI subcommand prints "Invalid project directory provided, no such directory: …/lint" — that's not a path bug, it's the CLI parser treating "lint" as an argument because the subcommand no longer exists.
@@ -249,6 +215,10 @@ These were resolved during Phase 1 execution. Don't undo the resolutions.
 18. **React 19 hydration mismatch in `<HomeShell>` if `useGameEnabled` disagrees between server and client.** `useGameEnabled` returns `{ enabled: true }` on SSR (no `window`) and may return `{ enabled: false }` on client (URL `?nogame`, mobile viewport, `prefers-reduced-motion: reduce`, stored "disabled" preference). React 19 logs a hydration error and the user sees a brief flash. Resolution: gate the game branch behind a `mounted` `useState(false)` set in `useEffect` — render `<PlaceholderLanding>` during SSR and first paint, swap to the game branch after mount. Originally applied inline in `<HomeShell>` (Phase 2 commit `11cad77`); Phase 3a moved the gate into `<GameEnabledProvider>` (the `mounted` field on the context value) so every consumer reads the same gate.
 19. **`eslint-config-next` flags the `mounted = useState(false); useEffect(() => setMounted(true), [])` pattern via `react-hooks/set-state-in-effect`.** This is the canonical client-only-render pattern; targeted inline suppression (`// eslint-disable-next-line react-hooks/set-state-in-effect`) is correct. Lives in `<GameEnabledProvider>` after Phase 3a (was in `<HomeShell>` in Phase 2).
 20. **Phaser 3.90's `physics.add.existing(ground, true)` second-arg `true` means "static body".** Omitting it gives the ground a dynamic body that falls under gravity. The `true` is load-bearing; don't strip it as cleanup.
+21. **`Phaser.GameObjects.Polygon` extends `Shape` which implements `Transform` — `Transform` declares public `w: number`.** A `private readonly w` field on a `Polygon` subclass collides with the inherited member. Spike's private fields are named `_spikeW` / `_spikeH` for this reason (Phase 5a). Don't rename them back.
+22. **Scene base-class `player` field is `protected player!: Player` (definite-assignment, non-null), not `Player | null`.** The plan's `protected player: Player | null = null` was changed because the 5 existing scene subclasses had `private player!: Player` and TypeScript refuses to widen visibility (private → protected). The subclass declarations were removed; subclasses still assign `this.player = ...` via `buildLevel` (Phase 5a). Don't reintroduce `Player | null` without revisiting the 5 subclass shapes.
+23. **One-way platforms exist because `y=704` warm-up platforms overlapped the player at ground level.** Player body y=680..736, a platform body at y=704..720 overlaps and blocks the player. `PlatformSpec` gained `oneWay?: boolean` (Phase 5a); corridor warm-up steps and the portfolio/contact entry ramps + vista are marked `oneWay: true` (player walks under at ground level, lands on top from above). Default is solid — omit the flag.
+24. **Playwright `fullyParallel: true` deadlocks heavy game-route tests.** The 52-second multi-screen traversal tests compete for CPU/GPU and produce dialog-detection timeouts under parallel mode. The `mode: 'serial'` gate is on the `game-route smoke` describe block (`test.describe.configure({ mode: 'serial' })`). Don't remove it.
 
 ---
 
